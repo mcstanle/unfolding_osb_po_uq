@@ -1,0 +1,21 @@
+{
+    "gmm_truth": {
+        "pi": [0.3, 0.7],
+        "mu": [-2, 2],
+        "sigma": [1, 1],
+        "T": 10000,
+        "sigma_n": 0.35
+    },
+    "gmm_ansatz": {
+        "pi": [0.3, 0.7],
+        "mu": [-1.8, 1.8],
+        "sigma": [0.8, 1.2],
+        "T": 10000,
+        "sigma_n": 0.35
+    },
+    "wide_bin_deconvolution_bins": {
+        "bin_lb": -7,
+        "bin_ub": 7
+    },
+    "smear_strength": 0.35
+}
