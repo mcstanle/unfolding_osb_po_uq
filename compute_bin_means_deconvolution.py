@@ -12,6 +12,9 @@ Intensity Functions
 2. GMM Ansatz
 3. Adversarial Ansatz
 
+NOTE: there is no toggle in this script like the compute_K_deconvolution.py
+file since computing these bin means takes little time (order of a few seconds)
+
 Author        : Michael Stanley
 Created       : 02 Nov 2021
 Last Modified : 02 Nov 2021
@@ -130,14 +133,50 @@ if __name__ == "__main__":
     )
 
     # Wide
-    true_means, smear_means, true_means_ansatz, smear_means_ansatz = compute_GMM_means_par(
+    print("Computing bin means...")
+
+    t_means_w, s_means_w, t_means_ansatz_w, s_means_ansatz_w = compute_GMM_means_par(
         true_edges=true_edges_wide,
         K=K_wide,
         K_ans=K_wide_mc
     )
+    print('- Wide Setup [Done]')
 
-    print(true_means)
-    print(true_means_ansatz)
     # Full Rank
+    t_means_fr, s_means_fr, t_means_ansatz_fr, s_means_ansatz_fr = compute_GMM_means_par(
+        true_edges=true_edges_fr,
+        K=K_fr,
+        K_ans=K_fr_mc
+    )
+    print('- Full Rank Setup [Done]')
 
     # Rank Deficient
+    t_means_rd, s_means_rd, t_means_ansatz_rd, s_means_ansatz_rd = compute_GMM_means_par(
+        true_edges=true_edges_rd,
+        K=K_rd,
+        K_ans=K_rd_mc
+    )
+    print('- Rank Deficient Setup [Done]')
+
+    # save the above
+    np.savez(
+        file=BIN_MEAN_BASE_LOC + '/gmm_wide.npz',
+        t_means_w=t_means_w,
+        s_means_w=s_means_w,
+        t_means_ansatz_w=t_means_ansatz_w,
+        s_means_ansatz_w=s_means_ansatz_w
+    )
+    np.savez(
+        file=BIN_MEAN_BASE_LOC + '/gmm_fr.npz',
+        t_means_w=t_means_fr,
+        s_means_w=s_means_fr,
+        t_means_ansatz_w=t_means_ansatz_fr,
+        s_means_ansatz_w=s_means_ansatz_fr
+    )
+    np.savez(
+        file=BIN_MEAN_BASE_LOC + '/gmm_rd.npz',
+        t_means_w=t_means_rd,
+        s_means_w=s_means_rd,
+        t_means_ansatz_w=t_means_ansatz_rd,
+        s_means_ansatz_w=s_means_ansatz_rd
+    )
