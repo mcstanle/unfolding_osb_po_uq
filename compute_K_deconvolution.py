@@ -2,7 +2,7 @@
 Compute smearing matrices for wide-bin deconvolution simulations.
 
 This script computes smearing matrices for the following setups (smear x true)
-1. wide           (40 x 10)
+1. Wide           (40 x 10)
 2. Full Rank      (40 x 40)
 3. Rank Deficient (40 x 80)
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         np.savez(
             file=MATRIX_BASE_LOC + '/K_rank_deficient_mats.npz',
             K_rd=K_rd,
-            K_rf_mc=K_rd_mc
+            K_rd_mc=K_rd_mc
         )
         print('- Rank Deficient [Done] -> %.2f seconds' % (time() - START))
     else:

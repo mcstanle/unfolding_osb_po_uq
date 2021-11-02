@@ -10,6 +10,50 @@ import numpy as np
 from scipy import stats
 from scipy.integrate import quad
 
+
+def compute_GMM_bin_means(
+    true_edges,
+    intensity_func,
+    pi,
+    mu,
+    sigma,
+    T,
+    K
+):
+    """
+    With some GMM intensity function and some domain bidding, compute the mean
+    count for each bin in both the true and smeared spaces.
+
+    Parameters:
+        true_edges     (np arr)   : edges of bins for true histogram
+        intensity_func (function) : intensity function for the poisson point
+                                    process
+        pi             (np arr)   : mixing probabilties for each gaussian
+        mu             (np arr)   : mean for each gaussian component
+        sigma          (np arr)   : standard deviation for each component
+        T              (np arr)   : Mean of poisson process
+        K              (np arr)   : smearing matrix
+
+    Returns:
+        bin mean counts
+        - true_means  (np arr)
+        - smear_means (np arr)
+    """
+    NUM_REAL_BINS = true_edges.shape[0] - 1
+    true_means = np.zeros(NUM_REAL_BINS)
+
+    for i in range(NUM_REAL_BINS):
+        true_means[i] = quad(
+            func=intensity_func,
+            args=(pi, mu, sigma, T),
+            a=true_edges[i],
+            b=true_edges[i + 1]
+        )[0]
+
+    smear_means = K @ true_means
+
+    return true_means, smear_means
+
 def compute_even_space_bin_edges(bin_lb, bin_ub, num_bins):
     """
     Computes the bin endpoints for evenly spaced bins.
