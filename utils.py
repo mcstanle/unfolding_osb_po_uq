@@ -3,7 +3,7 @@ Utility functions for code in this directory.
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 01 Nov 2021
+Last Modified : 02 Nov 2021
 ===============================================================================
 """
 import numpy as np

@@ -6,15 +6,22 @@ This script computes smearing matrices for the following setups (smear x true)
 2. Full Rank      (40 x 40)
 3. Rank Deficient (40 x 80)
 
+Usage:
+    Under "switches of matrices to compute", toggle the desired matrix
+    configurations you want to compute. These take on the order of several
+    minutes, which is why the switches exist.
+
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 01 Nov 2021
+Last Modified : 02 Nov 2021
 ===============================================================================
 """
 import json
+import numpy as np
 from utils import (
     compute_even_space_bin_edges, compute_K_gmm, intensity_f
 )
+from time import time
 
 def compute_true_and_mc_K(
     true_params, mc_params, true_edges, smear_edges, smear_strength
@@ -76,6 +83,14 @@ def compute_true_and_mc_K(
 
 if __name__ == "__main__":
 
+    # save locations
+    MATRIX_BASE_LOC = './smearing_matrices'
+
+    # switches of matrices to compute
+    COMPUTE_WIDE = False
+    COMPUTE_FR = False
+    COMPUTE_RD = True
+
     # read in parameter values
     with open('./simulation_model_parameters.json') as f:
         parameters = json.load(f)
@@ -102,13 +117,63 @@ if __name__ == "__main__":
     )
 
     # compute smearing matrices
-    # wide
-    K_wide, K_wide_mc = compute_true_and_mc_K(
-        true_params=parameters['gmm_truth'],
-        mc_params=parameters['gmm_ansatz'],
-        true_edges=true_edges_wide,
-        smear_edges=smear_edges,
-        smear_strength=parameters['smear_strength']
-    )
+    print("Computing smearing matrices...")
 
-    print(K_wide)
+    # Wide
+    if COMPUTE_WIDE:
+        START = time()
+        K_wide, K_wide_mc = compute_true_and_mc_K(
+            true_params=parameters['gmm_truth'],
+            mc_params=parameters['gmm_ansatz'],
+            true_edges=true_edges_wide,
+            smear_edges=smear_edges,
+            smear_strength=parameters['smear_strength']
+        )
+        np.savez(
+            file=MATRIX_BASE_LOC + '/K_wide_mats.npz',
+            K_wide=K_wide,
+            K_wide_mc=K_wide_mc
+        )
+        print('- Wide Setup [Done] -> %.2f seconds' % (time() - START))
+    else:
+        print('- Wide Setup [Skip]')
+
+    # Full Rank
+    if COMPUTE_FR:
+        START = time()
+        K_fr, K_fr_mc = compute_true_and_mc_K(
+            true_params=parameters['gmm_truth'],
+            mc_params=parameters['gmm_ansatz'],
+            true_edges=true_edges_fr,
+            smear_edges=smear_edges,
+            smear_strength=parameters['smear_strength']
+        )
+        np.savez(
+            file=MATRIX_BASE_LOC + '/K_full_rank_mats.npz',
+            K_fr=K_fr,
+            K_fr_mc=K_fr_mc
+        )
+        print('- Full Rank [Done] -> %.2f seconds' % (time() - START))
+    else:
+        print('- Full Rank [Skip]')
+
+    # Rank Deficient
+    if COMPUTE_RD:
+        START = time()
+        K_rd, K_rd_mc = compute_true_and_mc_K(
+            true_params=parameters['gmm_truth'],
+            mc_params=parameters['gmm_ansatz'],
+            true_edges=true_edges_rd,
+            smear_edges=smear_edges,
+            smear_strength=parameters['smear_strength']
+        )
+        np.savez(
+            file=MATRIX_BASE_LOC + '/K_rank_deficient_mats.npz',
+            K_rd=K_rd,
+            K_rf_mc=K_rd_mc
+        )
+        print('- Rank Deficient [Done] -> %.2f seconds' % (time() - START))
+    else:
+        print('- Rank Deficient [Skip]')
+    
+    print('---- Done ----')
