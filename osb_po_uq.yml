@@ -1,0 +1,11 @@
+name: osb_po_uq
+channels:
+  - defaults
+dependencies:
+  - matplotlib
+  - scipy
+  - statsmodels
+  - cvxpy
+  - tqdm
+prefix: /Users/mikestanley/anaconda3/envs/osb_po_uq
+
