@@ -168,15 +168,15 @@ if __name__ == "__main__":
     )
     np.savez(
         file=BIN_MEAN_BASE_LOC + '/gmm_fr.npz',
-        t_means_w=t_means_fr,
-        s_means_w=s_means_fr,
-        t_means_ansatz_w=t_means_ansatz_fr,
-        s_means_ansatz_w=s_means_ansatz_fr
+        t_means_fr=t_means_fr,
+        s_means_fr=s_means_fr,
+        t_means_ansatz_fr=t_means_ansatz_fr,
+        s_means_ansatz_fr=s_means_ansatz_fr
     )
     np.savez(
         file=BIN_MEAN_BASE_LOC + '/gmm_rd.npz',
-        t_means_w=t_means_rd,
-        s_means_w=s_means_rd,
-        t_means_ansatz_w=t_means_ansatz_rd,
-        s_means_ansatz_w=s_means_ansatz_rd
+        t_means_rd=t_means_rd,
+        s_means_rd=s_means_rd,
+        t_means_ansatz_rd=t_means_ansatz_rd,
+        s_means_ansatz_rd=s_means_ansatz_rd
     )

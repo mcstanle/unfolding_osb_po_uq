@@ -2,18 +2,22 @@
 Compute smearing matrices for wide-bin deconvolution simulations.
 
 This script computes smearing matrices for the following setups (smear x true)
-1. Wide           (40 x 10)
-2. Full Rank      (40 x 40)
-3. Rank Deficient (40 x 80)
+1. Wide               (40 x 10)
+2. Full Rank          (40 x 40)
+3. Rank Deficient     (40 x 80)
 
 Usage:
     Under "switches of matrices to compute", toggle the desired matrix
     configurations you want to compute. These take on the order of several
     minutes, which is why the switches exist.
 
+NOTE: the adversarial ansatz smearing matrix is computed in
+compute_K_deconvolution_adversarial_ansatz.py since it requires a different
+procedure than the above three cases.
+
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 02 Nov 2021
+Last Modified : 03 Nov 2021
 ===============================================================================
 """
 import json
@@ -89,7 +93,7 @@ if __name__ == "__main__":
     # switches of matrices to compute
     COMPUTE_WIDE = False
     COMPUTE_FR = False
-    COMPUTE_RD = True
+    COMPUTE_RD = False
 
     # read in parameter values
     with open('./simulation_model_parameters.json') as f:
@@ -103,7 +107,7 @@ if __name__ == "__main__":
     TRUE_BINS_FR = 40    # FR == "Full Rank"
     TRUE_BINS_RD = 80    # RD == "Rank Deficient"
     SMEAR_BINS = 40
-    true_edges_wide = true_edges = compute_even_space_bin_edges(
+    true_edges_wide = compute_even_space_bin_edges(
         bin_lb=bin_lb, bin_ub=bin_ub, num_bins=TRUE_BINS_WIDE
     )
     true_edges_fr = compute_even_space_bin_edges(

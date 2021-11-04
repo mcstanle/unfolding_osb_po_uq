@@ -8,6 +8,7 @@ TODO: update the names of the referenced functions and such.
 Author        : Mike Stanley
 Created       : 20 August 2021
 Last Modified : 20 August 2021
+===============================================================================
 """
 import cvxpy as cp
 import numpy as np
