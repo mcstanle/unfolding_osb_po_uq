@@ -22,9 +22,11 @@ Last Modified : 03 Nov 2021
 ===============================================================================
 """
 import cvxpy as cp
+import json
 import numpy as np
 from scipy import interpolate
-from utils import compute_even_space_bin_edges
+from scipy.integrate import quad
+from utils import compute_even_space_bin_edges, compute_K_arbitrary
 
 def identify_min_min_coverage(computed_coverages):
     """
@@ -122,10 +124,44 @@ def fit_interpolator_intensity(true_edges, ls_est_vals):
     return interp_ansatz_intensity
 
 
+def compute_adversarial_bin_means(true_edges, intensity_min_min, K_ansatz):
+    """
+    Computes the true and smear bin means using the adversarial ansatz.
+
+    Parameters:
+    -----------
+        true_edges        (np arr) : edges of true bins
+        intensity_min_min (func)   : real function for the adversarial ansatz
+        K_ansatz          (np arr) : adversarial ansatz smearing matrix
+
+    Returns:
+    --------
+        ansatz_true_means  (np arr) : true bin means
+        ansatz_smear_means (np arr) : smear bin means
+    """
+    # compute the unfold bin ansatz means
+    dim_true = true_edges.shape[0] - 1
+    ansatz_true_means = np.zeros(dim_true)
+
+    count = 0
+    for i, j in zip(true_edges[:-1], true_edges[1:]):
+        ansatz_true_means[count]= quad(intensity_min_min, a=i, b=j)[0]
+        count += 1
+        
+    # compute the smeared means
+    ansatz_smear_means = K_ansatz @ ansatz_true_means
+
+    return ansatz_true_means, ansatz_smear_means
+
+
 if __name__ == "__main__":
 
     # base directories
     BASE_DATA_DIR = './data'
+
+    # read in parameter values
+    with open('./simulation_model_parameters.json') as f:
+        parameters = json.load(f)
 
     # read in the computed coverages
     computed_coverages = np.load(BASE_DATA_DIR + '/brute_force_ansatz/coverages_gmm.npy')
@@ -147,6 +183,7 @@ if __name__ == "__main__":
     min_min_idx = identify_min_min_coverage(computed_coverages)
 
     # find the constrained LS solution for the min-min ansatz
+    print('Finding adversarial ansatz...')
     x_opt_min_min = constrained_ls_estimator_gmm_only(
         data=ansatz_data[min_min_idx, :], K=K_fr, smear_means=s_means_fr
     )
@@ -158,4 +195,29 @@ if __name__ == "__main__":
     intensity_min_min = fit_interpolator_intensity(
         true_edges=true_edges_fr,
         ls_est_vals=x_opt_min_min
+    )
+
+    # compute the ansatz matrix
+    print('Computing adversarial ansatz matrix...')
+    K_ansatz_min_min = compute_K_arbitrary(
+        intensity_func=intensity_min_min,
+        s_edges=true_edges_fr,  # same as true edges in the full-rank setup
+        t_edges=true_edges_fr,
+        sigma_smear=parameters['smear_strength']
+    )
+
+    # compute the true bin ansatz means
+    print('Computing adversarial ansatz true and smear means...')
+    ansatz_true_means, ansatz_smear_means = compute_adversarial_bin_means(
+        true_edges=true_edges_fr,
+        intensity_min_min=intensity_min_min,
+        K_ansatz=K_ansatz_min_min
+    )
+
+    # save the above
+    np.savez(
+        file=BASE_DATA_DIR + '/brute_force_ansatz/full_rank_adversarial_ansatz_and_means.npz',
+        K_ansatz_min_min=K_ansatz_min_min,
+        ansatz_unfold_means=ansatz_true_means,
+        ansatz_smear_means=ansatz_smear_means
     )

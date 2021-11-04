@@ -3,7 +3,7 @@ Utility functions for code in this directory.
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 02 Nov 2021
+Last Modified : 03 Nov 2021
 ===============================================================================
 """
 import numpy as np
@@ -124,6 +124,61 @@ def compute_K_gmm(
             K[i, j] = int_eval[0] / denom_eval[0]
 
     return K
+
+
+def compute_K_arbitrary(
+    intensity_func,
+    s_edges,
+    t_edges,
+    sigma_smear
+):
+    """
+    Compute the K matrix using an arbitrary intensity function.
+
+    NOTE: assumes that intensity function is computationally defined and is
+    thus simply evaluated at each x.
+
+    Parameters:
+        intensity_func (function) : intensity function
+        s_edges        (np array) : smeared space bin edges
+        t_edges        (np array) : true space bin edges
+        sigma_smear    (float)    : convolution standard deviation
+
+    Returns:
+        K (np array) : dimension dim_smear X dim_unfold
+    """
+    # find the true and smear dimensions
+    dim_true = t_edges.shape[0] - 1
+    dim_smear = s_edges.shape[0] - 1
+
+    # compute the smearing matrix
+    K = np.zeros(shape=(dim_smear, dim_true))
+
+    for j in range(dim_true):
+
+        # compute the denominator
+        denom_eval = quad(
+            func=intensity_func,
+            a=t_edges[j],
+            b=t_edges[j + 1]
+        )
+
+        for i in range(dim_smear):
+
+            # compute the numerator
+            int_eval = quad(
+                func=lambda x: intensity_func(x) * inner_int(
+                    x, S_lower=s_edges[i], S_upper=s_edges[i + 1],
+                    sigma=sigma_smear
+                ),
+                a=t_edges[j],
+                b=t_edges[j + 1]
+            )
+
+            K[i, j] = int_eval[0] / denom_eval[0]
+
+    return K
+
 
 def inner_int(y, S_lower, S_upper, sigma):
     """
