@@ -21,7 +21,10 @@ First, here is the general order in which one should run the components of this 
 The smearing matrices for the deconvolution and steeply falling spectrum examples are generated in `compute_K_deconvolution.py` and `compute_K_steeply_falling_spectrum.py`. Each of these files has switches to toggle the matrices one wishes to compute. By default, the matrices for both experiments are saved in `./smearing_matrices/`, thought this can be changed by altering `MATRIX_BASE_LOC` in each file.
 
 ## Generating Bin Means
-Text.
+Bin means for the deconvolution example are computed in `compute_bin_means_deconvolution.py`. This script handles the true and smear bin means for three setups; wide bin (10 true/40 smear), full-rank (40 true/40 smear), and rank-deficient (80 true/40 smear).
+
+## Adversarial Ansatz, Matrices, and Bin Means
+These are all computed with the script, `compute_K_deconvolution_adversarial_ansatz.py`. This script relies upon `./data/brute_force_ansatz/ansatz_data_gmm.npy` and `./data/brute_force_ansatz/coverages_gmm.npy` to compute the adversarial ansatz. The first data set is a collection of 1000 bin-count realizations from the true poisson process and can be reproduced by running `data_generation_ansatz_data.py`. To reproduce the paper results exactly, please use the original data in the repository. The second dataset is computed in `brute_force_data_gen_ansatz.py`. This script relies upon parallelization and was run on CMU Stat's compute cluster. While in principle it can be run on a local machine, it has not been tested in that context. We recommend, again, using the generated data set.
 
 ## Generating Functionals
 Text.

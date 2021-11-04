@@ -8,6 +8,9 @@ This script contains code to do the following
 3. compute the cubic spline interpolator
 4. compute the adversarial ansatz smearing matrix
 
+Generates the smearing matrices and true/smear bin means for both the 40
+(full rank) and 80 (rank deficient) true bin cases.
+
 NOTE: this script assumes that the bin-wise coverage for each proposed
 adversarial ansatz has been computed in parallel in
 ./brute_force_data_gen_ansatz.py. That script creates two data files:
@@ -18,10 +21,11 @@ adversarial ansatz has been computed in parallel in
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 03 Nov 2021
+Last Modified : 04 Nov 2021
 ===============================================================================
 """
 import cvxpy as cp
+from functools import partial
 import json
 import numpy as np
 from scipy import interpolate
@@ -154,6 +158,32 @@ def compute_adversarial_bin_means(true_edges, intensity_min_min, K_ansatz):
     return ansatz_true_means, ansatz_smear_means
 
 
+def intensity_min_min_const(t, intensity_f, const=10):
+    """
+    Wrapper around an intensity function that replaces the identically
+    zero portions of the domain with a constant. This is to prevent division
+    by zero when computing a smearing matrix from an intensity function that
+    is identically 0 over some bin.
+
+    Parameters:
+    -----------
+        t           (float)    : value at which to evaluate the intensity
+        intensity_f (function) : the intensity function
+        const       (float)    : the constant that replaces 0
+
+    Returns:
+    --------
+        intensity(f) if < const (float)
+    """
+    # evaluate intensity_f
+    orig_eval = intensity_f(t)
+    
+    if orig_eval == 0:
+        return const
+    else:
+        return orig_eval
+
+
 if __name__ == "__main__":
 
     # base directories
@@ -192,32 +222,54 @@ if __name__ == "__main__":
     true_edges_fr = compute_even_space_bin_edges(
         bin_lb=-7, bin_ub=7, num_bins=40
     )
+    true_edges_rd = compute_even_space_bin_edges(
+        bin_lb=-7, bin_ub=7, num_bins=80
+    )
     intensity_min_min = fit_interpolator_intensity(
         true_edges=true_edges_fr,
         ls_est_vals=x_opt_min_min
     )
 
     # compute the ansatz matrix
-    print('Computing adversarial ansatz matrix...')
+    print('Computing full-rank adversarial ansatz matrix...')
     K_ansatz_min_min = compute_K_arbitrary(
         intensity_func=intensity_min_min,
         s_edges=true_edges_fr,  # same as true edges in the full-rank setup
         t_edges=true_edges_fr,
         sigma_smear=parameters['smear_strength']
     )
+    
+    print('Computing rank-deficient adversarial ansatz matrix...')
+    intensity_f_rd = partial(intensity_min_min_const, intensity_f=intensity_min_min, const=10)
+    K_ansatz_min_min_rd = compute_K_arbitrary(
+        intensity_func=intensity_f_rd,
+        s_edges=true_edges_fr,  # same as true edges in the full-rank setup
+        t_edges=true_edges_rd,
+        sigma_smear=parameters['smear_strength']
+    )
 
     # compute the true bin ansatz means
-    print('Computing adversarial ansatz true and smear means...')
+    print('Computing full-rank adversarial ansatz true and smear means...')
     ansatz_true_means, ansatz_smear_means = compute_adversarial_bin_means(
         true_edges=true_edges_fr,
         intensity_min_min=intensity_min_min,
         K_ansatz=K_ansatz_min_min
     )
 
+    print('Computing rank-deficient adversarial ansatz true and smear means...')
+    ansatz_true_means_rd, ansatz_smear_means_rd = compute_adversarial_bin_means(
+        true_edges=true_edges_rd,
+        intensity_min_min=intensity_min_min,
+        K_ansatz=K_ansatz_min_min_rd
+    )
+
     # save the above
     np.savez(
         file=BASE_DATA_DIR + '/brute_force_ansatz/full_rank_adversarial_ansatz_and_means.npz',
         K_ansatz_min_min=K_ansatz_min_min,
+        K_ansatz_min_min_rd=K_ansatz_min_min_rd,
         ansatz_unfold_means=ansatz_true_means,
-        ansatz_smear_means=ansatz_smear_means
+        ansatz_smear_means=ansatz_smear_means,
+        ansatz_true_means_rd=ansatz_true_means_rd,
+        ansatz_smear_means_rd=ansatz_smear_means_rd
     )
