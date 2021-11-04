@@ -184,6 +184,42 @@ def intensity_min_min_const(t, intensity_f, const=10):
         return orig_eval
 
 
+def compute_adversarial_ansatz(
+    adv_antz_data, K, s_means, bin_lb, bin_ub, dim_true
+):
+    """
+    Compute an adversarial ansatz given...
+
+    Parameters:
+    -----------
+        adv_antz_data (np arr) : data used to generate the ansatz
+        K             (np arr) : smearing matrix
+        s_means       (np arr) : smear bin means
+        bin_lb        (float)  : min lower bound for all true bins
+        bin_ub        (float)  : max upper bound for all true bins
+        dim_true      (int)    : dimension of the true space
+
+    Returns:
+    --------
+        intensity_min_min (func) : the adversarial ansatz function
+    """
+    x_opt_min_min = constrained_ls_estimator_gmm_only(
+        data=adv_antz_data, K=K, smear_means=s_means
+    )
+
+    # fit the cubic-spline to the above
+    true_edges_fr = compute_even_space_bin_edges(
+        bin_lb=bin_lb, bin_ub=bin_ub, num_bins=dim_true
+    )
+
+    intensity_min_min = fit_interpolator_intensity(
+        true_edges=true_edges_fr,
+        ls_est_vals=x_opt_min_min
+    )
+
+    return intensity_min_min
+
+
 if __name__ == "__main__":
 
     # base directories
@@ -214,20 +250,21 @@ if __name__ == "__main__":
 
     # find the constrained LS solution for the min-min ansatz
     print('Finding adversarial ansatz...')
-    x_opt_min_min = constrained_ls_estimator_gmm_only(
-        data=ansatz_data[min_min_idx, :], K=K_fr, smear_means=s_means_fr
+
+    intensity_min_min = compute_adversarial_ansatz(
+        adv_antz_data=ansatz_data[min_min_idx, :],
+        K=K_fr,
+        s_means=s_means_fr,
+        bin_lb=-7,
+        bin_ub=7,
+        dim_true=40
     )
 
-    # fit the cubic-spline to the above
     true_edges_fr = compute_even_space_bin_edges(
         bin_lb=-7, bin_ub=7, num_bins=40
     )
     true_edges_rd = compute_even_space_bin_edges(
         bin_lb=-7, bin_ub=7, num_bins=80
-    )
-    intensity_min_min = fit_interpolator_intensity(
-        true_edges=true_edges_fr,
-        ls_est_vals=x_opt_min_min
     )
 
     # compute the ansatz matrix
@@ -265,7 +302,8 @@ if __name__ == "__main__":
 
     # save the above
     np.savez(
-        file=BASE_DATA_DIR + '/brute_force_ansatz/full_rank_adversarial_ansatz_and_means.npz',
+        file=BASE_DATA_DIR + '/brute_force_ansatz/adversarial_ansatz_matrices_and_bin_means.npz',
+        min_min_idx=min_min_idx,
         K_ansatz_min_min=K_ansatz_min_min,
         K_ansatz_min_min_rd=K_ansatz_min_min_rd,
         ansatz_unfold_means=ansatz_true_means,
