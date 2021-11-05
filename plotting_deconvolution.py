@@ -131,6 +131,7 @@ def plot_figure2(
     # read in the true wide bin data
     true_bin_means_obj = np.load(file='./bin_means/gmm_wide.npz')
     true_means_w_ansatz = true_bin_means_obj['t_means_ansatz_w']
+    true_means_w = true_bin_means_obj['t_means_w']
 
     # read in the ansatz data
     ansatz_data = np.load('./data/brute_force_ansatz/ansatz_data_gmm.npy')
@@ -138,7 +139,11 @@ def plot_figure2(
         './data/brute_force_ansatz/adversarial_ansatz_matrices_and_bin_means.npz'
     )
     s_mean_adv_ansatz_fr = ansatz_obj['ansatz_smear_means']
+    t_mean_adv_ansatz_fr = ansatz_obj['ansatz_true_means']
     min_min_idx = ansatz_obj['min_min_idx']
+
+    # read in the aggregation functionals
+    H = np.load(file='./functionals/H_deconvolution.npy')
 
     # smeared
     ax[0].bar(
@@ -163,7 +168,7 @@ def plot_figure2(
         (smear_edges[:-1] + smear_edges[1:]) / 2, ansatz_data[min_min_idx, :], label = 'Observations responsible for the \nAdversarial Ansatz'
     )
 
-    true
+    # true
     ax[1].bar(
         x=true_edges_wide[:-1],
         height=true_means_w_ansatz,
@@ -172,16 +177,16 @@ def plot_figure2(
     )
     ax[1].bar(
         x=true_edges_wide[:-1],
-        height=H @ ansatz_unfold_means_min_min,
+        height=H @ t_mean_adv_ansatz_fr,
         width=WIDTH_TRUE,
         align='edge', fill=False, edgecolor='black', label='Adversarial'
     )
-    # ax[1].bar(
-    #     x=true_edges_wide[:-1],
-    #     height=true_means_wide,
-    #     width=WIDTH_TRUE,
-    #     align='edge', fill=False, edgecolor='red', label='True Intensity', linestyle='--'
-    # )
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=true_means_w,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='red', label='True Intensity', linestyle='--'
+    )
 
     # axis labels
     ax[0].set_ylabel('Expected Bin Counts')
