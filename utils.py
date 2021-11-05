@@ -3,7 +3,7 @@ Utility functions for code in this directory.
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 03 Nov 2021
+Last Modified : 05 Nov 2021
 ===============================================================================
 """
 import numpy as np
@@ -217,3 +217,59 @@ def intensity_f(x, pi, mu, sigma, T):
     norm1 = stats.norm(loc=mu[1], scale=sigma[1])
 
     return pi[0] * T * norm0.pdf(x) + pi[1] * T * norm1.pdf(x)
+
+
+def int_covers_truth(truth, interval):
+    """
+    Determine if a given interval covers the true functional value.
+
+    Parameters:
+    -----------
+        truth    (float) : the actual functional value
+        interval (tuple) : optimized interval for the functional
+
+    Returns:
+    --------
+        1 if the interval covers the truth
+    """
+    covers = True
+    if truth < interval[0]:
+        covers = False
+    if truth > interval[1]:
+        covers = False
+
+    return int(covers)
+
+
+def compute_coverage(intervals, true_bin_means):
+    """
+    Given an ensemble of bin-wise intervals and the true bin count values,
+    estimate bin-wise coverage.
+
+    Dimension Key:
+        N - number of ensemble elements
+        M - number of functionals
+
+    Parameters:
+    -----------
+        intervals      (np arr) : N x M x 2
+        true_bin_means (np arr) : expected counts of true bins
+
+    Returns:
+    --------
+        coverage (np arr)
+    """
+    num_sims = intervals.shape[0]
+    num_funcs = intervals.shape[1]
+    
+    # find coverage for each bin
+    coverage = np.zeros(10)
+
+    for j in tqdm(range(num_funcs)):
+        num_cover_j = 0
+        for i in range(num_sims):
+            num_cover_j += int_covers_truth(true_bin_means[j], intervals[i, j, :])
+
+        coverage[j] = num_cover_j / num_sims
+
+    return coverage
