@@ -4,13 +4,15 @@ plot_create_deconvolution.py.
 
 Author        : Michael Stanley
 Created       : 04 Nov 2021
-Last Modified : 04 Nov 2021
+Last Modified : 05 Nov 2021
 ===============================================================================
 """
 from plotting_deconvolution import (
-    plot_figure1
+    plot_figure1,
+    plot_figure2
 )
 
 if __name__ == "__main__":
 
     plot_figure1()
+    plot_figure2()

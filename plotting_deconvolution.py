@@ -7,7 +7,7 @@ one wants to plot in the main section of the code.
 
 Author        : Michael Stanley
 Created       : 04 Nov 2021
-Last Modified : 04 Nov 2021
+Last Modified : 05 Nov 2021
 ===============================================================================
 """
 from compute_K_deconvolution_adversarial_ansatz import compute_adversarial_ansatz
@@ -29,6 +29,7 @@ def plot_figure1(save_loc=None):
 
     Returns:
     --------
+        None -- makes matplotlib plot
     """
     # read in the GMM intensity function parameters
     with open('./simulation_model_parameters.json') as f:
@@ -92,6 +93,100 @@ def plot_figure1(save_loc=None):
     plt.xlabel('Physical Observable')
 
     plt.legend()
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
+
+
+def plot_figure2(
+    true_edges_wide=np.linspace(-7, 7, 11),
+    smear_edges=np.linspace(-7, 7, 41),
+    save_loc=None
+):
+    """
+    True and smeared bin expected counts:
+
+    Parameters:
+    -----------
+        true_edges_wide   (np arr) : edges of the wide true bins
+        smear_edges       (np arr) : edges of the smeared bins
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
+
+    WIDTH_SMEAR = smear_edges[1] - smear_edges[0]
+    WIDTH_TRUE = true_edges_wide[1] - true_edges_wide[0]
+
+    # read in the smear bin means data
+    smear_bin_means_obj = np.load(file='./bin_means/gmm_fr.npz')
+    s_means_gmm_ansatz_fr = smear_bin_means_obj['s_means_ansatz_fr']
+    s_means_fr = smear_bin_means_obj['s_means_fr']
+
+    # read in the true wide bin data
+    true_bin_means_obj = np.load(file='./bin_means/gmm_wide.npz')
+    true_means_w_ansatz = true_bin_means_obj['t_means_ansatz_w']
+
+    # read in the ansatz data
+    ansatz_data = np.load('./data/brute_force_ansatz/ansatz_data_gmm.npy')
+    ansatz_obj = np.load(
+        './data/brute_force_ansatz/adversarial_ansatz_matrices_and_bin_means.npz'
+    )
+    s_mean_adv_ansatz_fr = ansatz_obj['ansatz_smear_means']
+    min_min_idx = ansatz_obj['min_min_idx']
+
+    # smeared
+    ax[0].bar(
+        x=smear_edges[:-1],
+        height=s_means_gmm_ansatz_fr,
+        width=WIDTH_SMEAR,
+        align='edge', fill=False, edgecolor='blue', label='Misspecified GMM'
+    )
+    ax[0].bar(
+        x=smear_edges[:-1],
+        height=s_mean_adv_ansatz_fr,
+        width=WIDTH_SMEAR,
+        align='edge', fill=False, edgecolor='black', label='Adversarial'
+    )
+    ax[0].bar(
+        x=smear_edges[:-1],
+        height=s_means_fr,
+        width=WIDTH_SMEAR,
+        align='edge', fill=False, edgecolor='red', label='True GMM', linestyle='--'
+    )
+    ax[0].scatter(
+        (smear_edges[:-1] + smear_edges[1:]) / 2, ansatz_data[min_min_idx, :], label = 'Observations responsible for the \nAdversarial Ansatz'
+    )
+
+    true
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=true_means_w_ansatz,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='blue', label='Misspecified GMM'
+    )
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=H @ ansatz_unfold_means_min_min,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black', label='Adversarial'
+    )
+    # ax[1].bar(
+    #     x=true_edges_wide[:-1],
+    #     height=true_means_wide,
+    #     width=WIDTH_TRUE,
+    #     align='edge', fill=False, edgecolor='red', label='True Intensity', linestyle='--'
+    # )
+
+    # axis labels
+    ax[0].set_ylabel('Expected Bin Counts')
+
+    ax[0].legend()
     plt.tight_layout()
 
     if save_loc:

@@ -306,7 +306,7 @@ if __name__ == "__main__":
         min_min_idx=min_min_idx,
         K_ansatz_min_min=K_ansatz_min_min,
         K_ansatz_min_min_rd=K_ansatz_min_min_rd,
-        ansatz_unfold_means=ansatz_true_means,
+        ansatz_true_means=ansatz_true_means,
         ansatz_smear_means=ansatz_smear_means,
         ansatz_true_means_rd=ansatz_true_means_rd,
         ansatz_smear_means_rd=ansatz_smear_means_rd

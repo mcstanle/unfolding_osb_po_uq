@@ -27,7 +27,7 @@ Bin means for the deconvolution example are computed in `compute_bin_means_decon
 These are all computed with the script, `compute_K_deconvolution_adversarial_ansatz.py`. This script relies upon `./data/brute_force_ansatz/ansatz_data_gmm.npy` and `./data/brute_force_ansatz/coverages_gmm.npy` to compute the adversarial ansatz. The first data set is a collection of 1000 bin-count realizations from the true poisson process and can be reproduced by running `data_generation_ansatz_data.py`. To reproduce the paper results exactly, please use the original data in the repository. The second dataset is computed in `brute_force_data_gen_ansatz.py`. This script relies upon parallelization and was run on CMU Stat's compute cluster. While in principle it can be run on a local machine, it has not been tested in that context. We recommend, again, using the generated data set.
 
 ## Generating Functionals
-Text.
+All bin aggregation functionals are generated in `create_functionals.py`. Both sets of functionals are saved in `./functionals/`.
 
 # Results
 For both sets of results, we store all plot code in a separate file from the script that actually creates the plots (see each sub-section below for details).
