@@ -265,7 +265,7 @@ def compute_coverage(intervals, true_bin_means):
     # find coverage for each bin
     coverage = np.zeros(10)
 
-    for j in tqdm(range(num_funcs)):
+    for j in range(num_funcs):
         num_cover_j = 0
         for i in range(num_sims):
             num_cover_j += int_covers_truth(true_bin_means[j], intervals[i, j, :])

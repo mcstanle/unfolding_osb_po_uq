@@ -13,16 +13,19 @@ from interval_estimators import (
 import numpy as np
 from tqdm import tqdm
 from utils import (
-    int_covers_truth
+    compute_coverage
 )
 
-def run_ls_coverage_exp(num_sims, smear_means, K, data, H, alpha):
+def run_ls_coverage_exp(
+    num_sims, true_means, smear_means, K, data, H, alpha
+):
     """
     Run the least-squares coverage experiment.
 
     Parameters:
     -----------
         num_sims    (int)    : number of simulations to estimate coverage
+        true_means  (np arr) : true bin means
         smear_means (np arr) : smear bin means to use in the Gaussian approx.
         K           (np arr) : smearing matrix
         data        (np arr) : data used to estimate coverage
@@ -31,6 +34,8 @@ def run_ls_coverage_exp(num_sims, smear_means, K, data, H, alpha):
 
     Returns:
     --------
+        intervals (np arr) : the ensemble of fitted intervals
+        coverage  (np arr) : the estimated bin-wise coverage
     """
     num_funcs = H.shape[0]
 
@@ -56,5 +61,52 @@ def run_ls_coverage_exp(num_sims, smear_means, K, data, H, alpha):
                 y=data_i, alpha=ALPHA
             )
 
+    # compute the coverage of the above intervals
+    true_bin_means_agg = H @ true_means
+    coverage = compute_coverage(
+        intervals=intervals,
+        true_bin_means=true_bin_means_agg
+    )
+
+    return intervals, coverage
+
+
 if __name__ == "__main__":
 
+    # operational parameters and switches
+    NUM_SIMS = 1000
+    ALPHA = 0.05
+    RUN_WIDE_LS = True
+
+    # import the data
+    data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+
+    if RUN_WIDE_LS:
+
+        # import the smearing matrix
+        K_wide_mc = np.load(
+            file='./smearing_matrices/K_wide_mats.npz'
+        )['K_wide_mc']
+
+        # import the bin means
+        bin_means_obj = np.load(file='./bin_means/gmm_wide.npz')
+        t_means_w = bin_means_obj['t_means_w']
+        s_means_w = bin_means_obj['s_means_w']
+
+        H_wb = np.identity(10)  # since we are unfolding directly to wide-bins
+        ints_ls_wb, coverage_ls_wb = run_ls_coverage_exp(
+            num_sims=NUM_SIMS,
+            true_means=t_means_w,
+            smear_means=s_means_w,
+            K=K_wide_mc,
+            data=data,
+            H=H_wb,
+            alpha=ALPHA
+        )
+
+        # save intervals and coverage
+        np.savez(
+            file='./data/wide_bin_deconvolution/ints_cov_wide_ls.npz',
+            intervals=ints_ls_wb,
+            coverage=coverage_ls_wb
+        )

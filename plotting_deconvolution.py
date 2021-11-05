@@ -14,6 +14,7 @@ from compute_K_deconvolution_adversarial_ansatz import compute_adversarial_ansat
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+from statsmodels.stats.proportion import proportion_confint
 from utils import intensity_f
 
 plt.style.use('seaborn-colorblind')
@@ -113,6 +114,7 @@ def plot_figure2(
     -----------
         true_edges_wide   (np arr) : edges of the wide true bins
         smear_edges       (np arr) : edges of the smeared bins
+        save_loc (str) : saving location -- note saved, by default
 
     Returns:
     --------
@@ -192,6 +194,98 @@ def plot_figure2(
     ax[0].set_ylabel('Expected Bin Counts')
 
     ax[0].legend()
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
+
+
+def plot_figure3(
+    true_edges_wide=np.linspace(-7, 7, 11),
+    smear_edges=np.linspace(-7, 7, 41),
+    save_loc=None
+):
+    """
+    Sample LS intervals for direct wide-bin unfolding and estimated bin-wise
+    coverage.
+
+    Parameters:
+    -----------
+        true_edges_wide   (np arr) : edges of the wide true bins
+        save_loc (str) : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # read in the true wide bin data
+    true_bin_means_obj = np.load(file='./bin_means/gmm_wide.npz')
+    true_means_w_ansatz = true_bin_means_obj['t_means_ansatz_w']
+    true_means_w = true_bin_means_obj['t_means_w']
+
+    # read in the computed intervals
+    ints_obj = np.load(file='./data/wide_bin_deconvolution/ints_cov_wide_ls.npz')
+    intervals = ints_obj['intervals']
+    coverage = ints_obj['coverage']
+
+    num_sims = intervals.shape[0]
+
+    # put the above two together
+    fig, ax = plt.subplots(ncols=2, nrows=1, figsize=(12, 6))
+
+    WIDTH_TRUE = true_edges_wide[1] - true_edges_wide[0]
+
+    # example intervals
+    # true bin expected counts
+    ax[0].bar(
+        x=true_edges_wide[:-1],
+        height=true_means_w,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black', label='True Bin Expected Counts'
+    )
+
+    # Recovered intervals
+    interval_midpoints = (intervals[0, :, 1] + intervals[0, :, 0]) / 2
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=interval_midpoints,
+        yerr=np.abs(intervals[0, :, :] - interval_midpoints[:, np.newaxis]).T,
+        capsize=7, ls='none', label='Least-squares 95% Confidence Intervals', color='red'
+    )
+
+    ax[0].set_ylabel('Bin Count')
+    ax[0].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[0].set_ylim(bottom=-100)
+
+    # coverage
+    # find the clopper-pearson intervals
+    clop_pears_ints = np.array(
+        [proportion_confint(i*num_sims, num_sims, alpha=0.05, method='beta') for i in coverage]
+    ).T
+
+    ax[1].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage,
+        yerr=np.abs(coverage - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+
+    # plot the coverage
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=coverage,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+
+    # plot the desired level
+    ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    ax[1].set_ylabel('Estimated Coverage')
+    ax[1].legend(bbox_to_anchor=(0.75, 1.15))
+
     plt.tight_layout()
 
     if save_loc:
