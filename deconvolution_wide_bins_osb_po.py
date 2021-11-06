@@ -123,6 +123,7 @@ def run_po_interval_exp(prior, data, H, smear_means, K, A, alpha):
 if __name__ == "__main__":
 
     # operational switches
+    ENS_SIZE = 1000  # number of ensemble elements to use
     GMM_ANSATZ = False
     ADVERSARIAL_ANSATZ = False
     ADVERSARIAL_ANSATZ_RD = True  # RD = "Rank Deficient"
@@ -147,7 +148,7 @@ if __name__ == "__main__":
         else:
             
             # import the data
-            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')[:ENS_SIZE, :]
 
             # import the smearing matrix
             K_fr_mc = np.load(
@@ -221,7 +222,7 @@ if __name__ == "__main__":
         else:
             
             # import the data
-            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')[:ENS_SIZE, :]
 
             # import the smearing matrix
             K_ansatz_min_min = np.load(
@@ -295,7 +296,7 @@ if __name__ == "__main__":
         else:
 
             # import the data
-            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')[:ENS_SIZE, :]
 
             # import the smearing matrix
             K_ansatz_min_min_rd = np.load(

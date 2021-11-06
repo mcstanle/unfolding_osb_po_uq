@@ -17,6 +17,7 @@ from compute_K_deconvolution_adversarial_ansatz import compute_adversarial_ansat
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 from statsmodels.stats.proportion import proportion_confint
 from utils import intensity_f, compute_mean_std_width
 
@@ -818,7 +819,7 @@ def plot_figure9(
     Parameters:
     -----------
         true_edges_wide (np arr) : edges of the wide true bins
-        save_loc        (str)    : saving location -- note saved, by default
+        save_loc        (str)    : saving location -- not saved, by default
 
     Returns:
     --------
@@ -892,3 +893,238 @@ def plot_figure9(
         plt.savefig(save_loc, dpi=300)
 
     plt.show()
+
+
+def plot_figure10(save_loc=None):
+    """
+    Expected Intervals Widths across LS, OSB, PO, and matrix rank.
+
+    Parameters:
+    -----------
+        save_loc        (str)    : saving location -- not saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # read in the computed intervals
+    intervals_ls_agg = np.load(
+        file='./data/wide_bin_deconvolution/ints_cov_agg_ls.npz'
+    )['intervals']
+    intervals_files_fr = np.load(
+        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz_ORIGINAL.npz'
+    )
+    intervals_osb_fr = intervals_files_fr['intervals_osb_fr']
+    intervals_po_fr = intervals_files_fr['intervals_po_fr']
+
+    intervals_files_rd = np.load(
+        file='./data/wide_bin_deconvolution/intervals_osb_po_rank_def_adversarial_ansatz_ORIGINAL.npz'
+    )
+    intervals_osb_adv_80 = intervals_files_rd['intervals_osb_adv_80']
+    intervals_po_adv_80 = intervals_files_rd['intervals_po_adv_80']
+
+    # compute mean/std widths
+    ls_mean_widths_fr, ls_std_widths_fr = compute_mean_std_width(intervals=intervals_ls_agg)
+    osb_mean_widths_fr, osb_std_widths_fr = compute_mean_std_width(intervals=intervals_osb_fr)
+    po_mean_widths_fr, po_std_widths_fr = compute_mean_std_width(intervals=intervals_po_fr)
+    osb_mean_widths_rd, osb_std_widths_rd = compute_mean_std_width(intervals=intervals_osb_adv_80)
+    po_mean_widths_rd, po_std_widths_rd = compute_mean_std_width(intervals=intervals_po_adv_80)
+
+    # look at interval expected length
+    plt.figure(figsize=(10,5))
+
+    x_plot = np.arange(1, 11)
+
+    # LS intervals
+    plt.plot(
+        x_plot, ls_mean_widths_fr,
+        label='Least-squares (40 True Bins)', color='black', linestyle='--', alpha=0.65
+    )
+
+    # osb intervals
+    plt.plot(
+        x_plot, osb_mean_widths_fr,
+        label='OSB (40 True Bins)', color='blue', linestyle='--', alpha=0.65
+    )
+    plt.plot(
+        x_plot, osb_mean_widths_rd,
+        label='OSB (80 True Bins)', color='blue', alpha=0.95
+    )
+
+    # PO intervals
+    plt.plot(
+        x_plot, po_mean_widths_fr,
+        label='PO (40 True Bins)', color='red', linestyle='--', alpha=0.65
+    )
+    plt.plot(
+        x_plot, po_mean_widths_rd,
+        label='PO (80 True Bins)', color='red', alpha=0.95
+    )
+
+    # axis labels
+    plt.ylabel(r'Average Interval Length')
+    plt.xlabel('Bin Number')
+
+    plt.xticks(x_plot)
+
+    plt.legend()
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
+
+
+def plot_figure11(save_loc=None):
+    """
+    Expected Intervals Widths across LS, OSB, PO, SSB, and Minimax bounds
+
+    Parameters:
+    -----------
+        save_loc        (str)    : saving location -- not saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # least-squares
+    intervals_ls_agg = np.load(
+        file='./data/wide_bin_deconvolution/ints_cov_agg_ls.npz'
+    )['intervals']
+    ls_mean_widths_fr, ls_std_widths_fr = compute_mean_std_width(intervals=intervals_ls_agg)
+
+    # OSB & PO
+    intervals_osb_po_fr = np.load(
+        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz_ORIGINAL.npz'
+    )
+    intervals_osb_fr = intervals_osb_po_fr['intervals_osb_fr']
+    intervals_po_fr = intervals_osb_po_fr['intervals_po_fr']
+    osb_mean_widths_fr, osb_std_widths_fr = compute_mean_std_width(intervals=intervals_osb_fr)
+    po_mean_widths_fr, po_std_widths_fr = compute_mean_std_width(intervals=intervals_po_fr)
+
+    # SSB and Minimax
+    ssb_mm_obj = np.load(
+        file='./data/wide_bin_deconvolution/intervals_ssb_minimax_full_rank_misspec_gmm_ansatz.npz'
+    )
+    minimax_interval_widths = ssb_mm_obj['minimax_interval_widths']
+    ssb_intervals = ssb_mm_obj['ssb_intervals']
+    ssb_mean_widths, ssb_std_widths = compute_mean_std_width(intervals=ssb_intervals)
+
+    # look at interval expected length
+    plt.figure(figsize=(10,5))
+
+    NUM_SIMS = 1000
+    x_plot = np.arange(1, 11)
+    gauss_quant = stats.norm.ppf(97.5)
+
+    # LS intervals
+    plt.plot(x_plot, ls_mean_widths_fr, label='Least-squares', color='black')
+
+    plt.errorbar(
+        x=x_plot,
+        y=ls_mean_widths_fr,
+        yerr=2 * ls_std_widths_fr,
+        capsize=7, ls='none', color='black'
+    )
+
+    # osb intervals
+    plt.plot(x_plot, osb_mean_widths_fr, label='OSB', color='blue')
+
+    plt.errorbar(
+        x=x_plot,
+        y=osb_mean_widths_fr,
+        yerr=2 * osb_std_widths_fr / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='blue'
+    )
+
+    # PO intervals
+    plt.plot(x_plot, po_mean_widths_fr, label='PO', color='red')
+
+    plt.errorbar(
+        x=x_plot,
+        y=po_mean_widths_fr,
+        yerr=2 * po_std_widths_fr / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='red'
+    )
+
+    # SSB
+    plt.plot(x_plot, ssb_mean_widths, label='SSB', color='purple')
+
+    plt.errorbar(
+        x=x_plot,
+        y=ssb_mean_widths,
+        yerr=2 * ssb_std_widths / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='purple'
+    )
+
+    # Minimax
+    plt.plot(x_plot, minimax_interval_widths[:, 0] * 2, color='gray')
+    plt.plot(x_plot, minimax_interval_widths[:, 1] * 2, color='gray')
+    plt.fill_between(
+        x_plot, minimax_interval_widths[:, 0] * 2, minimax_interval_widths[:, 1] * 2,
+        color='gray',
+        alpha=0.2,
+        label='Minimax Range'
+    )
+
+    # axis labels
+    plt.ylabel(r'Average Interval Length (Error bars are $\pm 2 \hat{\sigma}$)')
+    plt.xlabel('Bin Number')
+
+    plt.xticks(x_plot)
+
+    plt.legend()
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
+
+
+def plot_figure12(save_loc=None):
+    """
+    Expected Intervals widths across OSB and PO setups and rank deficiency of
+    smearing matrix.
+
+    Parameters:
+    -----------
+        save_loc        (str)    : saving location -- not saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    pass
+
+
+def plot_figure13(save_loc=None):
+    """
+    Looking at the sensitivity of the expected interval width with respect to
+    the rank deficiency
+
+    Parameters:
+    -----------
+        save_loc        (str)    : saving location -- not saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    pass
+
+
+def plot_figure14(save_loc=None):
+    """
+    Sensitivity of PO interval widths to choice of prior
+
+    Parameters:
+    -----------
+        save_loc        (str)    : saving location -- not saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    pass

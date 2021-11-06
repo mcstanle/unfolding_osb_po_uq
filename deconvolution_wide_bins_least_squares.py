@@ -82,7 +82,7 @@ if __name__ == "__main__":
     RUN_FR_AGG_ADV = True  # ADV = "Adversarial"
 
     # import the data
-    data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+    data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')[:NUM_SIMS, :]
 
     if RUN_WIDE:  # mades ensemble of intervals for figure 3
 
