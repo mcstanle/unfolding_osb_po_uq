@@ -263,7 +263,7 @@ def compute_coverage(intervals, true_bin_means):
     num_funcs = intervals.shape[1]
     
     # find coverage for each bin
-    coverage = np.zeros(10)
+    coverage = np.zeros(num_funcs)
 
     for j in range(num_funcs):
         num_cover_j = 0
