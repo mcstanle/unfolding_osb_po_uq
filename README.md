@@ -51,11 +51,11 @@ Plotting functions are stored in `plotting_deconvolution.py`. Plots can be gener
 
 In the paper, we step through the following sequence of results:
 1. Unfolding using least-squares intervals (`deconvolution_wide_bins_least_squares.py`)
-    1. Directly to wide-bins (dramatic undercoverage)
-    2. Directly to fine-bins (addressed undercoverage)
-    3. Unfolding to fine-bins with post-inversion aggregation (addressed undercoverage)
-2. Wide-bin unfolding with OSB and PO intervals
-    1. GMM Ansatz (minor misspecification)
+    1. Directly to wide-bins (dramatic undercoverage) (`./data/wide_bin_deconvolution/ints_cov_wide_ls.npz`)
+    2. Directly to fine-bins (addressed undercoverage) (`./data/wide_bin_deconvolution/ints_cov_fine_ls.npz`)
+    3. Unfolding to fine-bins with post-inversion aggregation (addressed undercoverage) (`./data/wide_bin_deconvolution/ints_cov_agg_ls.npz`)
+2. Wide-bin unfolding with OSB and PO intervals (`deconvolution_wide_bins_least_squares.py`)
+    1. GMM Ansatz (minor misspecification) (`./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz`)
     2. Adversarial Ansatz (substantial misspecification)
 
 ## Application to Unfolding a Steeply Falling Particle Spectrum

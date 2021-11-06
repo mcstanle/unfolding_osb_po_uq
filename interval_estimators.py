@@ -8,7 +8,7 @@ Computational implementation of the following intervals:
 
 Author        : Michael Stanley
 Created       : 05 Nov 2021
-Last Modified : 05 Nov 2021
+Last Modified : 06 Nov 2021
 ===============================================================================
 """
 import numpy as np
@@ -82,3 +82,4 @@ def least_squares_interval(K, h, y, alpha=0.05):
     ub = np.dot(h, lambda_hat) + crit_val * np.sqrt(h.T @ lambda_cov @ h)
 
     return (lb, ub)
+

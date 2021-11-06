@@ -5,6 +5,9 @@ This script is written so that each function can plot its respective figure in
 isolation from any other figure. This way, one can simply toggle the figures
 one wants to plot in the main section of the code.
 
+The convention is that the code to plot figure k can be found in function
+called "plot_figurek". 
+
 Author        : Michael Stanley
 Created       : 04 Nov 2021
 Last Modified : 06 Nov 2021
@@ -15,7 +18,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 from statsmodels.stats.proportion import proportion_confint
-from utils import intensity_f
+from utils import intensity_f, compute_mean_std_width
 
 plt.style.use('seaborn-colorblind')
 
@@ -469,4 +472,132 @@ def plot_figure5(
     if save_loc:
         plt.savefig(save_loc, dpi=300)
 
+    plt.show()
+
+
+def plot_figure6(
+    true_edges_wide=np.linspace(-7, 7, 11),
+    save_loc=None
+):
+    """
+    Comparing Least-Squares, OSB, and PO intervals, computed using the smearing
+    matrix generated with the GMM Ansatz.
+
+    Parameters:
+    -----------
+        true_edges_wide (np arr) : edges of the wide true bins
+        save_loc        (str)    : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # read in the true wide bin data
+    true_means_w = np.load(file='./bin_means/gmm_wide.npz')['t_means_w']
+
+    # read in the computed intervals
+    intervals_ls_agg = np.load(
+        file='./data/wide_bin_deconvolution/ints_cov_agg_ls.npz'
+    )['intervals']
+    intervals_full_rank_gmm_ans_files = np.load(
+        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz'
+    )
+    intervals_osb_fr = intervals_full_rank_gmm_ans_files['intervals_osb_fr']
+    intervals_po_fr = intervals_full_rank_gmm_ans_files['intervals_po_fr']
+
+    # compute mean/std widths
+    ls_mean_widths_fr, ls_std_widths_fr = compute_mean_std_width(intervals=intervals_ls_agg)
+    osb_mean_widths_fr, osb_std_widths_fr = compute_mean_std_width(intervals=intervals_osb_fr)
+    po_mean_widths_fr, po_std_widths_fr = compute_mean_std_width(intervals=intervals_po_fr)
+
+    # combining the expected interval lengths with the example
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    WIDTH_TRUE = true_edges_wide[1] - true_edges_wide[0]
+    NUM_SIMS = intervals_ls_agg.shape[0]
+
+    # single interval instance
+    ax[0].bar(
+        x=true_edges_wide[:-1],
+        height=true_means_w,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black', label='True Bin Expected Counts'
+    )
+
+    INT_EX_IDX = 1 
+    midpoints_ls = (intervals_ls_agg[INT_EX_IDX, :, 1] + intervals_ls_agg[INT_EX_IDX, :, 0]) / 2
+    midpoints_osb = (intervals_osb_fr[INT_EX_IDX, :, 1] + intervals_osb_fr[INT_EX_IDX, :, 0]) / 2
+    midpoints_po = (intervals_po_fr[INT_EX_IDX, :, 1] + intervals_po_fr[INT_EX_IDX, :, 0]) / 2
+
+    # LS
+    CAPSIZE = 4
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2 - (WIDTH_TRUE / 3),
+        y=midpoints_ls,
+        yerr=np.abs(intervals_ls_agg[INT_EX_IDX, :, :] - midpoints_ls[:, np.newaxis]).T,
+        capsize=CAPSIZE, ls='none', label='Least-squares', color='black'
+    )
+
+    # OSB
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=midpoints_osb,
+        yerr=np.abs(intervals_osb_fr[INT_EX_IDX, :, :] - midpoints_osb[:, np.newaxis]).T,
+        capsize=CAPSIZE, ls='none', label='OSB', color='blue'
+    )
+
+    # PO
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2 + (WIDTH_TRUE / 3),
+        y=midpoints_osb,
+        yerr=np.abs(intervals_po_fr[INT_EX_IDX, :, :] - midpoints_po[:, np.newaxis]).T,
+        capsize=CAPSIZE, ls='none', label='PO', color='red'
+    )
+
+    ax[0].set_ylabel('Bin Count')
+    ax[0].legend()
+
+    # mean widths
+    # LS intervals
+    x_plot = np.arange(1, 11)
+    ax[1].plot(x_plot, ls_mean_widths_fr, label='Least-squares', color='black')
+
+    ax[1].errorbar(
+        x=x_plot,
+        y=ls_mean_widths_fr,
+        yerr=2 * ls_std_widths_fr,
+        capsize=7, ls='none', color='black'
+    )
+
+    # osb intervals
+    ax[1].plot(x_plot, osb_mean_widths_fr, label='OSB', color='blue')
+
+    ax[1].errorbar(
+        x=x_plot,
+        y=osb_mean_widths_fr,
+        yerr=2 * osb_std_widths_fr / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='blue'
+    )
+
+    # PO intervals
+    ax[1].plot(x_plot, po_mean_widths_fr, label='PO', color='red')
+
+    ax[1].errorbar(
+        x=x_plot,
+        y=po_mean_widths_fr,
+        yerr=2 * po_std_widths_fr / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='red'
+    )
+
+    # axis labels
+    ax[1].set_ylabel(r'Average Interval Length (Error bars are $\pm 2$se)')
+    ax[1].set_xlabel('Bin Number')
+    ax[1].set_xticks(x_plot)
+    ax[1].legend()
+
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+    
     plt.show()

@@ -273,3 +273,30 @@ def compute_coverage(intervals, true_bin_means):
         coverage[j] = num_cover_j / num_sims
 
     return coverage
+
+
+def compute_mean_std_width(intervals):
+    """
+    Compute the empirical interval width mean and standard deviation from an
+    ensemble of intervals.
+
+    Parameters:
+    -----------
+        intervals      (np arr) : N x M x 2
+        true_bin_means (np arr) : expected counts of true bins
+
+    Returns:
+    --------
+        mean_widths (np arr)
+        std_widths  (np arr)
+    """
+    num_func = intervals.shape[1]
+
+    mean_widths = np.zeros(num_func)
+    std_widths = np.zeros(num_func)
+
+    for i in range(num_func):
+        mean_widths[i] = (intervals[:, i, 1] - intervals[:, i, 0]).mean()
+        std_widths[i] = (intervals[:, i, 1] - intervals[:, i, 0]).std()
+
+    return mean_widths, std_widths
