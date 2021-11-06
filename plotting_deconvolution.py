@@ -1096,7 +1096,58 @@ def plot_figure12(save_loc=None):
     --------
         None -- makes matplotlib plot
     """
-    pass
+    # load the intervals
+    interval_obj = np.load(file='./data/wide_bin_deconvolution/coverage_and_intervals_40_80_160_320.npz')
+
+    intervals_osb_40 = interval_obj['intervals_osb_40']
+    intervals_osb_80 = interval_obj['intervals_osb_80']
+    intervals_osb_160 = interval_obj['intervals_osb_160']
+    intervals_osb_320 = interval_obj['intervals_osb_320']
+    intervals_po_40 = interval_obj['intervals_po_40']
+    intervals_po_80 = interval_obj['intervals_po_80']
+    intervals_po_160 = interval_obj['intervals_po_160']
+    intervals_po_320 = interval_obj['intervals_po_320']
+
+    # find expected widths
+    osb_mean_width_40 = compute_mean_std_width(intervals=intervals_osb_40)[0]
+    osb_mean_width_80 = compute_mean_std_width(intervals=intervals_osb_80)[0]
+    osb_mean_width_160 = compute_mean_std_width(intervals=intervals_osb_160)[0]
+    osb_mean_width_320 = compute_mean_std_width(intervals=intervals_osb_320)[0]
+    po_mean_width_40 = compute_mean_std_width(intervals=intervals_po_40)[0]
+    po_mean_width_80 = compute_mean_std_width(intervals=intervals_po_80)[0]
+    po_mean_width_160 = compute_mean_std_width(intervals=intervals_po_160)[0]
+    po_mean_width_320 = compute_mean_std_width(intervals=intervals_po_320)[0]
+
+    # looking at length by bin
+    fig, ax = plt.subplots(ncols=2, nrows=1, figsize=(10, 5), sharey=True)
+
+    x_vals = np.arange(1, 11)
+
+    # osb
+    ax[0].plot(x_vals, osb_mean_width_40, label='40 Bins')
+    ax[0].plot(x_vals, osb_mean_width_80, label='80 Bins')
+    ax[0].plot(x_vals, osb_mean_width_160, label='160 Bins')
+    ax[0].plot(x_vals, osb_mean_width_320, label='320 Bins')
+
+    # po
+    ax[1].plot(x_vals, po_mean_width_40)
+    ax[1].plot(x_vals, po_mean_width_80)
+    ax[1].plot(x_vals, po_mean_width_160)
+    ax[1].plot(x_vals, po_mean_width_320)
+
+    # labels
+    ax[0].set_ylabel('Expected Width')
+    ax[0].set_xlabel('Bin #')
+    ax[1].set_xlabel('Bin #')
+
+    ax[0].legend()
+
+    plt.tight_layout()
+    
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
 
 
 def plot_figure13(save_loc=None):
@@ -1112,7 +1163,75 @@ def plot_figure13(save_loc=None):
     --------
         None -- makes matplotlib plot
     """
-    pass
+    # load the intervals
+    interval_obj = np.load(file='./data/wide_bin_deconvolution/coverage_and_intervals_40_80_160_320.npz')
+
+    intervals_osb_40 = interval_obj['intervals_osb_40']
+    intervals_osb_80 = interval_obj['intervals_osb_80']
+    intervals_osb_160 = interval_obj['intervals_osb_160']
+    intervals_osb_320 = interval_obj['intervals_osb_320']
+    intervals_po_40 = interval_obj['intervals_po_40']
+    intervals_po_80 = interval_obj['intervals_po_80']
+    intervals_po_160 = interval_obj['intervals_po_160']
+    intervals_po_320 = interval_obj['intervals_po_320']
+
+    # find expected widths
+    osb_mean_width_40 = compute_mean_std_width(intervals=intervals_osb_40)[0]
+    osb_mean_width_80 = compute_mean_std_width(intervals=intervals_osb_80)[0]
+    osb_mean_width_160 = compute_mean_std_width(intervals=intervals_osb_160)[0]
+    osb_mean_width_320 = compute_mean_std_width(intervals=intervals_osb_320)[0]
+    po_mean_width_40 = compute_mean_std_width(intervals=intervals_po_40)[0]
+    po_mean_width_80 = compute_mean_std_width(intervals=intervals_po_80)[0]
+    po_mean_width_160 = compute_mean_std_width(intervals=intervals_po_160)[0]
+    po_mean_width_320 = compute_mean_std_width(intervals=intervals_po_320)[0]
+
+    # stack the above for each of plotting
+    osb_mean_widths = np.vstack((
+        osb_mean_width_40,
+        osb_mean_width_80,
+        osb_mean_width_160,
+        osb_mean_width_320,
+    ))
+    po_mean_widths = np.vstack((
+        po_mean_width_40,
+        po_mean_width_80,
+        po_mean_width_160,
+        po_mean_width_320,
+    ))
+
+    # look at bin interval length trajectories
+    fig, ax = plt.subplots(ncols=2, nrows=1, figsize=(10, 5), sharey=True)
+
+    x_vals = [40, 80, 160, 320]
+    linestyles = ['solid', 'dotted', 'dashed', 'dashdot']
+
+    # osb intervals
+    for i in range(10):
+        ax[0].plot(x_vals, osb_mean_widths[:, i], label='Bin %i' % (i + 1), linestyle=linestyles[i % 4])
+
+    # po intervals
+    for i in range(10):
+        ax[1].plot(x_vals, po_mean_widths[:, i], label='Bin %i' % (i + 1), linestyle=linestyles[i % 4])
+
+    ax[0].legend(bbox_to_anchor=(1, .5))
+
+    # set bin count axis
+    ax[0].set_xticks(x_vals)
+    ax[0].set_xticklabels(x_vals)
+    ax[1].set_xticks(x_vals)
+    ax[1].set_xticklabels(x_vals)
+
+    ax[0].set_xlabel('Unfold Dimension')
+    ax[1].set_xlabel('Unfold Dimension')
+
+    ax[0].set_ylabel('Expected Width')
+
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
 
 
 def plot_figure14(save_loc=None):
@@ -1127,4 +1246,101 @@ def plot_figure14(save_loc=None):
     --------
         None -- makes matplotlib plot
     """
-    pass
+    load_objects = np.load(
+        file='./data/wide_bin_deconvolution/po_intervals_flat_ansatz_correct_ORIGINAL.npz'
+    )
+
+    intervals_po_flat = load_objects['intervals_po_flat']
+    intervals_po_ansatz = load_objects['intervals_po_ansatz']
+    intervals_po_correct = load_objects['intervals_po_correct']
+
+    # PO Adversarial Intervals
+    intervals_files = np.load(
+        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_adv_ansatz_ORIGINAL.npz'
+    )
+    intervals_po_adv = intervals_files['intervals_po_adv']
+
+    # OSB with GMM ansatz
+    intervals_osb = np.load(
+        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz_ORIGINAL.npz'
+    )['intervals_osb_fr']
+
+    # mean intervals widths
+    po_mean_widths_flat, po_std_widths_flat = compute_mean_std_width(intervals=intervals_po_flat)
+    po_mean_widths_ansatz, po_std_widths_ansatz = compute_mean_std_width(intervals=intervals_po_ansatz)
+    po_mean_widths_ansatz_adv, po_std_widths_ansatz_adv = compute_mean_std_width(intervals=intervals_po_adv)
+    po_mean_widths_correct, po_std_widths_correct = compute_mean_std_width(intervals=intervals_po_correct)
+    osb_mean_widths, osb_std_widths = compute_mean_std_width(intervals=intervals_osb)
+
+    # look at interval expected length
+    plt.figure(figsize=(10,5))
+
+    NUM_SIMS = 1000
+    ALPHA = 0.05
+
+    x_plot = np.arange(1, 11)
+    gauss_quant = stats.norm.ppf(97.5)
+
+    # Flat
+    plt.plot(x_plot, po_mean_widths_flat, label='Flat', color='black')
+
+    plt.errorbar(
+        x=x_plot,
+        y=po_mean_widths_flat,
+        yerr=2 * po_std_widths_flat / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='black'
+    )
+
+    # Ansatz
+    plt.plot(x_plot, po_mean_widths_ansatz, label='Misspecified GMM', color='blue')
+
+    plt.errorbar(
+        x=x_plot,
+        y=po_mean_widths_ansatz,
+        yerr=2 * po_std_widths_ansatz / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='blue'
+    )
+
+    # adversarial
+    plt.plot(x_plot, po_mean_widths_ansatz_adv, label='Adversarial', color='green')
+
+    plt.errorbar(
+        x=x_plot,
+        y=po_mean_widths_ansatz_adv,
+        yerr=2 * po_std_widths_ansatz_adv / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='green'
+    )
+
+    # Correct
+    plt.plot(x_plot, po_mean_widths_correct, label='Correct', color='red')
+
+    plt.errorbar(
+        x=x_plot,
+        y=po_mean_widths_correct,
+        yerr=2 * po_std_widths_correct / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='red'
+    )
+
+    # OSB
+    plt.plot(x_plot, osb_mean_widths, label='OSB', color='gray')
+
+    plt.errorbar(
+        x=x_plot,
+        y=osb_mean_widths,
+        yerr=2 * osb_std_widths / np.sqrt(NUM_SIMS),
+        capsize=7, ls='none', color='gray'
+    )
+
+    # axis labels
+    plt.ylabel(r'Average Interval Length (Error bars are $\pm 2$se)')
+    plt.xlabel('Bin Number')
+
+    plt.xticks(x_plot)
+
+    plt.legend()
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()

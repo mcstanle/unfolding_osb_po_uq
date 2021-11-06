@@ -22,12 +22,21 @@ if __name__ == "__main__":
 
     np.save(file='./functionals/H_deconvolution.npy', arr=H)
 
-    # Rank-Deficient, i.e., 40x80
+    # Rank-Deficient, e.g., 40x80
     H_80 = np.zeros(shape=(10, 80))
     for i in range(10):
         H_80[i, (8 * i):(8 * (i + 1))] = 1
-
     np.save(file='./functionals/H_80_deconvolution.npy', arr=H_80)
+
+    H_160 = np.zeros(shape=(10, 160))
+    for i in range(10):
+        H_160[i, (16 * i):(16 * (i + 1))] = 1
+    np.save(file='./functionals/H_160_deconvolution.npy', arr=H_160)
+
+    H_320 = np.zeros(shape=(10, 320))
+    for i in range(10):
+        H_320[i, (32 * i):(32 * (i + 1))] = 1
+    np.save(file='./functionals/H_320_deconvolution.npy', arr=H_320)
 
     # steeply falling spectrum example ---------- 
     H = np.zeros(shape=(10, 60))
