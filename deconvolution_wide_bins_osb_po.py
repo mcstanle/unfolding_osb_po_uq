@@ -17,7 +17,7 @@ from tqdm import tqdm
 from utils import compute_coverage
 
 
-def run_osb_interval_exp(data, H, smear_means, K, alpha):
+def run_osb_interval_exp(data, H, smear_means, K, A, alpha):
     """
     Compute an ensemble of bin-wise OSB intervals.
 
@@ -27,6 +27,7 @@ def run_osb_interval_exp(data, H, smear_means, K, alpha):
         H           (np arr) : collection of linear functionals
         smear_means (np arr) : smear bin means to compute Cholesky decomp
         K           (np arr) : smearing matrix
+        A           (np arr) : constraint matrix
         alpha       (np arr) : type 1 error threshold -- (1 - confidence level)
 
     Returns:
@@ -55,7 +56,7 @@ def run_osb_interval_exp(data, H, smear_means, K, alpha):
 
             # fit the intervals
             interval_ij = osb_interval(
-                y=data_i, K=K_mc_tilde, h=H[j, :], alpha=alpha
+                y=data_i, K=K_mc_tilde, h=H[j, :], A=A, alpha=alpha
             )
             
             # save the intervals for later
@@ -64,7 +65,7 @@ def run_osb_interval_exp(data, H, smear_means, K, alpha):
     return intervals
 
 
-def run_po_interval_exp(prior, data, H, smear_means, K, alpha):
+def run_po_interval_exp(prior, data, H, smear_means, K, A, alpha):
     """
     Compute an ensemble of bin-wise PO intervals.
 
@@ -80,6 +81,7 @@ def run_po_interval_exp(prior, data, H, smear_means, K, alpha):
         H           (np arr) : collection of linear functionals
         smear_means (np arr) : smear bin means to compute Cholesky decomp
         K           (np arr) : smearing matrix
+        A           (np arr) : constraint matrix
         alpha       (np arr) : type 1 error threshold -- (1 - confidence level)
 
     Returns:
@@ -108,7 +110,8 @@ def run_po_interval_exp(prior, data, H, smear_means, K, alpha):
 
             # fit the interval
             interval_ij = po_interval(
-                y=data_i, prior_mean=prior_40, K=K_mc_tilde, h=H[j, :], alpha=alpha
+                y=data_i, prior_mean=prior_40, K=K_mc_tilde,
+                h=H[j, :], A=A, alpha=alpha
             )
             
             # save the intervals for later
@@ -122,11 +125,10 @@ if __name__ == "__main__":
     # operational switches
     GMM_ANSATZ = True
     ADVERSARIAL_ANSATZ = False
-    READ_INTERVALS = True
+    READ_INTERVALS = True  # use this flag to exactly reproduce the paper results
 
     # interval parameters
     ALPHA = 0.05
-    NUM_EXP = 10
 
     # read in the true aggregated bin means
     t_means_w = np.load(file='./bin_means/gmm_wide.npz')['t_means_w']
@@ -136,7 +138,7 @@ if __name__ == "__main__":
         # fit the ensemble of intervals
         if READ_INTERVALS:  # this is the original ensemble that created results in paper
             intervals_full_rank_gmm_ans_files = np.load(
-                file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz'
+                file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz_ORIGINAL.npz'
             )
             intervals_osb_fr = intervals_full_rank_gmm_ans_files['intervals_osb_fr']
             intervals_po_fr = intervals_full_rank_gmm_ans_files['intervals_po_fr']
@@ -160,10 +162,11 @@ if __name__ == "__main__":
 
             # OSB intervals
             intervals_osb_fr = run_osb_interval_exp(
-                data=data[:NUM_EXP, :],
+                data=data,
                 H=H,
                 smear_means=s_means_fr,
                 K=K_fr_mc,
+                A=-np.identity(t_means_fr.shape[0]),  # positivity constraint, only
                 alpha=ALPHA
             )
 
@@ -171,11 +174,20 @@ if __name__ == "__main__":
             prior_40 = np.ones(40) * t_means_fr.mean()
             intervals_po_fr = run_po_interval_exp(
                 prior=prior_40,
-                data=data[:NUM_EXP, :],
+                data=data,
                 H=H,
                 smear_means=s_means_fr,
                 K=K_fr_mc,
+                A=-np.identity(t_means_fr.shape[0]),  # positivity constraint, only
                 alpha=ALPHA
+            )
+
+            # save the above intervals
+            np.savez(
+                file=BASE_DIR + './data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz',
+                intervals_ls_fr=intervals_ls_agg,
+                intervals_osb_fr=intervals_osb_fr,
+                intervals_po_fr=intervals_po_fr,
             )
 
         # estimate the coverage

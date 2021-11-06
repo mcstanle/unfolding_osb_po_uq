@@ -13,7 +13,9 @@ from plotting_deconvolution import (
     plot_figure3,
     plot_figure4,
     plot_figure5,
-    plot_figure6
+    plot_figure6,
+    plot_figure7,
+    plot_figure8
 )
 
 if __name__ == "__main__":
@@ -23,4 +25,6 @@ if __name__ == "__main__":
     # plot_figure3()
     # plot_figure4()
     # plot_figure5()
-    plot_figure6()
+    # plot_figure6()
+    # plot_figure7()
+    plot_figure8()

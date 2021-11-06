@@ -601,3 +601,98 @@ def plot_figure6(
         plt.savefig(save_loc, dpi=300)
     
     plt.show()
+
+
+def plot_figure7(
+    true_edges_wide=np.linspace(-7, 7, 11),
+    save_loc=None
+):
+    """
+    OSB and PO bin-wise coverage for the GMM ansatz.
+
+    Parameters:
+    -----------
+        true_edges_wide (np arr) : edges of the wide true bins
+        save_loc        (str)    : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    coverage_obj = np.load(
+        file='./data/wide_bin_deconvolution/coverage_osb_po_full_rank_misspec_gmm_ansatz.npz'
+    )
+    coverage_osb_fr = coverage_obj['coverage_osb_fr']
+    coverage_po_fr = coverage_obj['coverage_po_fr']
+
+    num_sims = 1000
+    WIDTH_TRUE = true_edges_wide[1] - true_edges_wide[0]
+
+    # showing coverage of OSB and PO is preserved
+    fig, ax = plt.subplots(ncols=2, nrows=1, figsize=(12, 3))
+
+    # OSB Coverage
+    clop_pears_ints = np.array(
+        [proportion_confint(i*num_sims, num_sims, alpha=0.05, method='beta') for i in coverage_osb_fr]
+    ).T
+
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_osb_fr,
+        yerr=np.abs(coverage_osb_fr - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+
+    # plot the coverage
+    ax[0].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_osb_fr,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+
+    # plot the desired level
+    ax[0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+    ax[0].set_ylabel('Estimated Coverage')
+
+    # PO Coverage
+    # find the clopper-pearson intervals
+    clop_pears_ints = np.array(
+        [proportion_confint(i*num_sims, num_sims, alpha=0.05, method='beta') for i in coverage_po_fr]
+    ).T
+
+    ax[1].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_po_fr,
+        yerr=np.abs(coverage_po_fr - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+
+    # plot the coverage
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_po_fr,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+
+    # plot the desired level
+    ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # cut off the bottom
+    ax[0].set_ylim(bottom=0.6)
+    ax[1].set_ylim(bottom=0.6)
+
+    # add legend
+    ax[0].legend(bbox_to_anchor=(0.25, 1.12))
+
+    # add titles
+    ax[0].set_title('OSB')
+    ax[1].set_title('PO')
+
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
