@@ -123,8 +123,8 @@ def run_po_interval_exp(prior, data, H, smear_means, K, A, alpha):
 if __name__ == "__main__":
 
     # operational switches
-    GMM_ANSATZ = True
-    ADVERSARIAL_ANSATZ = False
+    GMM_ANSATZ = False
+    ADVERSARIAL_ANSATZ = True
     READ_INTERVALS = True  # use this flag to exactly reproduce the paper results
 
     # interval parameters
@@ -142,6 +142,7 @@ if __name__ == "__main__":
             )
             intervals_osb_fr = intervals_full_rank_gmm_ans_files['intervals_osb_fr']
             intervals_po_fr = intervals_full_rank_gmm_ans_files['intervals_po_fr']
+
         else:
             
             # import the data
@@ -184,7 +185,7 @@ if __name__ == "__main__":
 
             # save the above intervals
             np.savez(
-                file=BASE_DIR + './data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz',
+                file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz',
                 intervals_ls_fr=intervals_ls_agg,
                 intervals_osb_fr=intervals_osb_fr,
                 intervals_po_fr=intervals_po_fr,
@@ -202,7 +203,37 @@ if __name__ == "__main__":
 
         # save the above
         np.savez(
-            file='./data/wide_bin_deconvolution/coverage_osb_po_full_rank_misspec_gmm_ansatz',
+            file='./data/wide_bin_deconvolution/coverage_osb_po_full_rank_misspec_gmm_ansatz.npz',
             coverage_osb_fr=coverage_osb_fr,
             coverage_po_fr=coverage_po_fr
+        )
+
+    if ADVERSARIAL_ANSATZ:
+
+        if READ_INTERVALS:    
+            
+            intervals_full_rank_gmm_ans_files = np.load(
+                file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_adv_ansatz_ORIGINAL.npz'
+            )
+            intervals_osb_adv = intervals_full_rank_gmm_ans_files['intervals_osb_adv']
+            intervals_po_adv = intervals_full_rank_gmm_ans_files['intervals_po_adv']
+
+        else:
+            pass
+
+        # estimate the coverage
+        coverage_osb_adv = compute_coverage(
+            intervals=intervals_osb_adv,
+            true_bin_means=t_means_w
+        )
+        coverage_po_adv = compute_coverage(
+            intervals=intervals_po_adv,
+            true_bin_means=t_means_w
+        )
+
+        # save the above
+        np.savez(
+            file='./data/wide_bin_deconvolution/coverage_osb_po_full_rank_adv_ansatz.npz',
+            coverage_osb_adv=coverage_osb_adv,
+            coverage_po_adv=coverage_po_adv
         )

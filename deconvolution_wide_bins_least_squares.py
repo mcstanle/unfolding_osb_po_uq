@@ -76,14 +76,15 @@ if __name__ == "__main__":
     # operational parameters and switches
     NUM_SIMS = 1000
     ALPHA = 0.05
-    RUN_WIDE_LS = False
-    RUN_FR_FB_LS = False  # FR = "Full Rank", FB = "Fine Bin"
-    RUN_FR_AGG_LS = True  # FR = "Full Rank", AGG = "Aggregated"
+    RUN_WIDE = False
+    RUN_FR_FB = False  # FR = "Full Rank", FB = "Fine Bin"
+    RUN_FR_AGG = False  # FR = "Full Rank", AGG = "Aggregated"
+    RUN_FR_AGG_ADV = True  # ADV = "Adversarial"
 
     # import the data
     data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
 
-    if RUN_WIDE_LS:  # mades ensemble of intervals for figure 3
+    if RUN_WIDE:  # mades ensemble of intervals for figure 3
 
         # import the smearing matrix
         K_wide_mc = np.load(
@@ -113,7 +114,7 @@ if __name__ == "__main__":
             coverage=coverage_ls_wb
         )
 
-    if RUN_FR_FB_LS:  # mades ensemble of intervals for figure 4
+    if RUN_FR_FB:  # mades ensemble of intervals for figure 4
 
         # import the smearing matrix
         K_fr_mc = np.load(
@@ -143,7 +144,7 @@ if __name__ == "__main__":
             coverage=coverage_ls_fb
         )
 
-    if RUN_FR_AGG_LS:  # mades ensemble of intervals for figure 5
+    if RUN_FR_AGG:  # mades ensemble of intervals for figure 5
 
         # import the smearing matrix
         K_fr_mc = np.load(
@@ -173,4 +174,36 @@ if __name__ == "__main__":
             file='./data/wide_bin_deconvolution/ints_cov_agg_ls.npz',
             intervals=ints_ls_agg,
             coverage=coverage_ls_agg
+        )
+
+    if RUN_FR_AGG_ADV:  # full-rank adversarial inversion
+        
+        # import the smearing matrix
+        K_ansatz_min_min = np.load(
+            file='./data/brute_force_ansatz/adversarial_ansatz_matrices_and_bin_means.npz'
+        )['K_ansatz_min_min']
+
+        # import the bin means
+        bin_means_obj = np.load(file='./bin_means/gmm_fr.npz')
+        t_means_fr = bin_means_obj['t_means_fr']
+        s_means_fr = bin_means_obj['s_means_fr']
+
+        # import the aggregating functionals
+        H = np.load(file='./functionals/H_deconvolution.npy')
+
+        ints_ls_agg_adv, coverage_ls_agg_adv = run_ls_coverage_exp(
+            num_sims=NUM_SIMS,
+            true_means=t_means_fr,
+            smear_means=s_means_fr,
+            K=K_ansatz_min_min,
+            data=data,
+            H=H,
+            alpha=ALPHA
+        )
+
+        # save intervals and coverage
+        np.savez(
+            file='./data/wide_bin_deconvolution/ints_cov_agg_adv_ls.npz',
+            intervals=ints_ls_agg_adv,
+            coverage=coverage_ls_agg_adv
         )

@@ -696,3 +696,131 @@ def plot_figure7(
         plt.savefig(save_loc, dpi=300)
 
     plt.show()
+
+
+def plot_figure8(
+    true_edges_wide=np.linspace(-7, 7, 11),
+    save_loc=None
+):
+    """
+    OSB and PO bin-wise coverage for the GMM adversarial ansatz.
+
+    Parameters:
+    -----------
+        true_edges_wide (np arr) : edges of the wide true bins
+        save_loc        (str)    : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # least-squares Coverage
+    coverage_ls_adv = np.load(file='./data/wide_bin_deconvolution/ints_cov_agg_adv_ls.npz')['coverage']
+
+    # OSB and PO Coverage
+    coverage_obj = np.load(
+        file='./data/wide_bin_deconvolution/coverage_osb_po_full_rank_adv_ansatz.npz'
+    )
+
+    coverage_osb_adv = coverage_obj['coverage_osb_adv']
+    coverage_po_adv = coverage_obj['coverage_po_adv']
+
+    # showing coverage of LS/OSB/PO Intervals
+    fig, ax = plt.subplots(ncols=3, nrows=1, figsize=(12, 4))
+    NUM_SIMS = 1000
+    WIDTH_TRUE = true_edges_wide[1] - true_edges_wide[0]
+
+    # LS Coverage
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=0.05, method='beta') for i in coverage_ls_adv]
+    ).T
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_ls_adv,
+        yerr=np.abs(coverage_ls_adv - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+    ax[0].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_ls_adv,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+    ax[0].set_ylabel('Estimated Coverage')
+
+    # OSB Coverage
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=0.05, method='beta') for i in coverage_osb_adv]
+    ).T
+    ax[1].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_osb_adv,
+        yerr=np.abs(coverage_osb_adv - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($N = 1000$)'
+    )
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_osb_adv,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+
+    # PO Coverage
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=0.05, method='beta') for i in coverage_po_adv]
+    ).T
+    ax[2].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_po_adv,
+        yerr=np.abs(coverage_po_adv - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($N = 1000$)'
+    )
+    ax[2].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_po_adv,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[2].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # lop off the bottom
+    ax[0].set_ylim(bottom=0.6)
+    ax[1].set_ylim(bottom=0.6)
+    ax[2].set_ylim(bottom=0.6)
+
+    # legend
+    ax[0].legend(bbox_to_anchor=(1.1, 1.35))
+
+    # titles
+    ax[0].set_title('LS')
+    ax[1].set_title('OSB')
+    ax[2].set_title('PO')
+
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
+
+
+def plot_figure9(
+    true_edges_wide=np.linspace(-7, 7, 11),
+    save_loc=None
+):
+    """
+    OSB and PO bin-wise coverage for the adversarial ansatz, but computed with
+    80 true bins to minimize systematic error.
+
+    Parameters:
+    -----------
+        true_edges_wide (np arr) : edges of the wide true bins
+        save_loc        (str)    : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
