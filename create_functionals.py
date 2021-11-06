@@ -7,21 +7,29 @@ linear functionals in the paper. Each row of "H" is one "h".
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 05 Nov 2021
+Last Modified : 06 Nov 2021
 ===============================================================================
 """
 import numpy as np
 
 if __name__ == "__main__":
 
-    # deconvolution example 
+    # deconvolution example ----------
+    # full-rank, i.e., 40x40
     H = np.zeros(shape=(10, 40))
     for i in range(10):
         H[i, (4 * i):(4 * (i + 1))] = 1
 
     np.save(file='./functionals/H_deconvolution.npy', arr=H)
 
-    # steeply falling spectrum example
+    # Rank-Deficient, i.e., 40x80
+    H_80 = np.zeros(shape=(10, 80))
+    for i in range(10):
+        H_80[i, (8 * i):(8 * (i + 1))] = 1
+
+    np.save(file='./functionals/H_80_deconvolution.npy', arr=H_80)
+
+    # steeply falling spectrum example ---------- 
     H = np.zeros(shape=(10, 60))
 
     true_func_endpoints = np.square(np.linspace(np.sqrt(400), np.sqrt(1000), num=11))

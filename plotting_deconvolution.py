@@ -824,3 +824,71 @@ def plot_figure9(
     --------
         None -- makes matplotlib plot
     """
+    coverage_obj = np.load(
+        file='./data/wide_bin_deconvolution/coverage_osb_po_rank_def_adv_ansatz.npz'
+    )
+    coverage_osb_adv_80 = coverage_obj['coverage_osb_adv_80']
+    coverage_po_adv_80 = coverage_obj['coverage_po_adv_80']
+
+    NUM_SIMS = 1000
+    WIDTH_TRUE = true_edges_wide[1] - true_edges_wide[0]
+
+    # showing coverage of LS/OSB/PO Intervals
+    fig, ax = plt.subplots(ncols=2, nrows=1, figsize=(12, 3), sharey=False)
+
+    # OSB Coverage
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=0.05, method='beta') for i in coverage_osb_adv_80]
+    ).T
+    ax[0].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_osb_adv_80,
+        yerr=np.abs(coverage_osb_adv_80 - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+    ax[0].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_osb_adv_80,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # PO Coverage
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=0.05, method='beta') for i in coverage_po_adv_80]
+    ).T
+    ax[1].errorbar(
+        x=(true_edges_wide[1:] + true_edges_wide[:-1]) / 2,
+        y=coverage_po_adv_80,
+        yerr=np.abs(coverage_po_adv_80 - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($N = 1000$)'
+    )
+    ax[1].bar(
+        x=true_edges_wide[:-1],
+        height=coverage_po_adv_80,
+        width=WIDTH_TRUE,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # cut off the bottom
+    ax[0].set_ylim(bottom=0.6)
+    ax[1].set_ylim(bottom=0.6)
+
+    # add legend
+    ax[0].legend(bbox_to_anchor=(0.25, 1.12))
+
+    # add titles
+    ax[0].set_title('OSB')
+    ax[1].set_title('PO')
+
+    # axis label
+    ax[0].set_ylabel('Estimated Coverage')
+
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()

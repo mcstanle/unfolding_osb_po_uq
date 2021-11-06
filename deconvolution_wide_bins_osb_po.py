@@ -124,7 +124,8 @@ if __name__ == "__main__":
 
     # operational switches
     GMM_ANSATZ = False
-    ADVERSARIAL_ANSATZ = True
+    ADVERSARIAL_ANSATZ = False
+    ADVERSARIAL_ANSATZ_RD = True  # RD = "Rank Deficient"
     READ_INTERVALS = True  # use this flag to exactly reproduce the paper results
 
     # interval parameters
@@ -137,11 +138,11 @@ if __name__ == "__main__":
 
         # fit the ensemble of intervals
         if READ_INTERVALS:  # this is the original ensemble that created results in paper
-            intervals_full_rank_gmm_ans_files = np.load(
+            intervals_files = np.load(
                 file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz_ORIGINAL.npz'
             )
-            intervals_osb_fr = intervals_full_rank_gmm_ans_files['intervals_osb_fr']
-            intervals_po_fr = intervals_full_rank_gmm_ans_files['intervals_po_fr']
+            intervals_osb_fr = intervals_files['intervals_osb_fr']
+            intervals_po_fr = intervals_files['intervals_po_fr']
 
         else:
             
@@ -186,9 +187,8 @@ if __name__ == "__main__":
             # save the above intervals
             np.savez(
                 file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz',
-                intervals_ls_fr=intervals_ls_agg,
                 intervals_osb_fr=intervals_osb_fr,
-                intervals_po_fr=intervals_po_fr,
+                intervals_po_fr=intervals_po_fr
             )
 
         # estimate the coverage
@@ -212,14 +212,58 @@ if __name__ == "__main__":
 
         if READ_INTERVALS:    
             
-            intervals_full_rank_gmm_ans_files = np.load(
+            intervals_files = np.load(
                 file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_adv_ansatz_ORIGINAL.npz'
             )
-            intervals_osb_adv = intervals_full_rank_gmm_ans_files['intervals_osb_adv']
-            intervals_po_adv = intervals_full_rank_gmm_ans_files['intervals_po_adv']
+            intervals_osb_adv = intervals_files['intervals_osb_adv']
+            intervals_po_adv = intervals_files['intervals_po_adv']
 
         else:
-            pass
+            
+            # import the data
+            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+
+            # import the smearing matrix
+            K_ansatz_min_min = np.load(
+                file='./data/brute_force_ansatz/adversarial_ansatz_matrices_and_bin_means.npz'
+            )['K_ansatz_min_min']
+
+            # import the bin means
+            bin_means_obj = np.load(file='./bin_means/gmm_fr.npz')
+            t_means_fr = bin_means_obj['t_means_fr']
+            s_means_fr = bin_means_obj['s_means_fr']
+
+            # import the aggregating functionals
+            H = np.load(file='./functionals/H_deconvolution.npy')
+
+            # OSB intervals
+            intervals_osb_adv = run_osb_interval_exp(
+                data=data,
+                H=H,
+                smear_means=s_means_fr,
+                K=K_ansatz_min_min,
+                A=-np.identity(t_means_fr.shape[0]),  # positivity constraint, only
+                alpha=ALPHA
+            )
+
+            # PO intervals
+            prior_40 = np.ones(40) * t_means_fr.mean()
+            intervals_po_adv = run_po_interval_exp(
+                prior=prior_40,
+                data=data,
+                H=H,
+                smear_means=s_means_fr,
+                K=K_ansatz_min_min,
+                A=-np.identity(t_means_fr.shape[0]),  # positivity constraint, only
+                alpha=ALPHA
+            )
+
+            # save the above intervals
+            np.savez(
+                file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_adv_ansatz.npz',
+                intervals_osb_adv=intervals_osb_adv,
+                intervals_po_adv=intervals_po_adv
+            )
 
         # estimate the coverage
         coverage_osb_adv = compute_coverage(
@@ -236,4 +280,78 @@ if __name__ == "__main__":
             file='./data/wide_bin_deconvolution/coverage_osb_po_full_rank_adv_ansatz.npz',
             coverage_osb_adv=coverage_osb_adv,
             coverage_po_adv=coverage_po_adv
+        )
+
+    if ADVERSARIAL_ANSATZ_RD:
+
+        if READ_INTERVALS:    
+            
+            intervals_files = np.load(
+                file='./data/wide_bin_deconvolution/intervals_osb_po_rank_def_adversarial_ansatz_ORIGINAL.npz'
+            )
+            intervals_osb_adv_80 = intervals_files['intervals_osb_adv_80']
+            intervals_po_adv_80 = intervals_files['intervals_po_adv_80']
+
+        else:
+
+            # import the data
+            data = np.load(file='./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy')
+
+            # import the smearing matrix
+            K_ansatz_min_min_rd = np.load(
+                file='./data/brute_force_ansatz/adversarial_ansatz_matrices_and_bin_means.npz'
+            )['K_ansatz_min_min_rd']
+
+            # import the bin means
+            bin_means_obj = np.load(file='./bin_means/gmm_rd.npz')
+            t_means_rd = bin_means_obj['t_means_rd']
+            s_means_rd = bin_means_obj['s_means_rd']
+
+            # import the aggregating functionals
+            H_80 = np.load(file='./functionals/H_80_deconvolution.npy')
+
+            # OSB intervals
+            intervals_osb_adv_80 = run_osb_interval_exp(
+                data=data,
+                H=H_80,
+                smear_means=s_means_rd,
+                K=K_ansatz_min_min_rd,
+                A=-np.identity(t_means_rd.shape[0]),  # positivity constraint, only
+                alpha=ALPHA
+            )
+
+            # PO intervals
+            prior_80 = np.ones(80) * t_means_rd.mean()
+            intervals_po_adv_80 = run_po_interval_exp(
+                prior=prior_80,
+                data=data,
+                H=H_80,
+                smear_means=s_means_rd,
+                K=K_ansatz_min_min_rd,
+                A=-np.identity(t_means_rd.shape[0]),  # positivity constraint, only
+                alpha=ALPHA
+            )
+
+            # save the above intervals
+            np.savez(
+                file='./data/wide_bin_deconvolution/intervals_osb_po_rank_def_adv_ansatz.npz',
+                intervals_osb_adv_80=intervals_osb_adv_80,
+                intervals_po_adv_80=intervals_po_adv_80
+            )
+
+        # estimate the coverage
+        coverage_osb_adv_80 = compute_coverage(
+            intervals=intervals_osb_adv_80,
+            true_bin_means=t_means_w
+        )
+        coverage_po_adv_80 = compute_coverage(
+            intervals=intervals_po_adv_80,
+            true_bin_means=t_means_w
+        )
+
+        # save the above
+        np.savez(
+            file='./data/wide_bin_deconvolution/coverage_osb_po_rank_def_adv_ansatz.npz',
+            coverage_osb_adv_80=coverage_osb_adv_80,
+            coverage_po_adv_80=coverage_po_adv_80
         )
