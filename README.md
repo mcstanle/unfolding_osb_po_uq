@@ -54,6 +54,9 @@ In the paper, we step through the following sequence of results:
     1. Directly to wide-bins (dramatic undercoverage) (`./data/wide_bin_deconvolution/ints_cov_wide_ls.npz`)
     2. Directly to fine-bins (addressed undercoverage) (`./data/wide_bin_deconvolution/ints_cov_fine_ls.npz`)
     3. Unfolding to fine-bins with post-inversion aggregation (addressed undercoverage) (`./data/wide_bin_deconvolution/ints_cov_agg_ls.npz`)
+    4. Unfolding with OSB and PO intervals with the GMM Ansatz (`./deconvolution_wide_bins_osb_po.py`)
+    5. Comparing OSB and PO with SSB and Minimax (`./deconvolution_wide_bins_ssb_minimax.py`)
+    6. Effects of number of true bins and prior choice on the expected width of the PO intervals
 2. Wide-bin unfolding with OSB and PO intervals (`deconvolution_wide_bins_least_squares.py`)
     1. GMM Ansatz (minor misspecification) (`./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz`)
     2. Adversarial Ansatz (substantial misspecification)
