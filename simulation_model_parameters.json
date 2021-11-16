@@ -17,5 +17,21 @@
         "bin_lb": -7,
         "bin_ub": 7
     },
-    "smear_strength": 0.35
+    "smear_strength": 0.35,
+    "steep_f_spec_truth": {
+        "L": 5.1,
+        "N_0": 1e17,
+        "ALPHA": 5,
+        "SQRT_S": 7e3,
+        "BETA": 10,
+        "GAMMA": 10
+    },
+    "steep_f_spec_ansatz": {
+        "L": 5.1,
+        "N_0": 5.5e19,
+        "ALPHA": 6,
+        "SQRT_S": 7e3,
+        "BETA": 12,
+        "GAMMA": 10
+    }
 }
