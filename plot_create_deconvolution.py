@@ -1,12 +1,12 @@
 """
 Script generating the plots for section 4. Written in conjunction with
-plot_create_deconvolution.py.
+plot_deconvolution.py.
 
 Recommended use: uncomment the figure you would like to plot.
 
 Author        : Michael Stanley
 Created       : 04 Nov 2021
-Last Modified : 06 Nov 2021
+Last Modified : 16 Nov 2021
 ===============================================================================
 """
 from plotting_deconvolution import (

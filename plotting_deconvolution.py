@@ -6,7 +6,7 @@ isolation from any other figure. This way, one can simply toggle the figures
 one wants to plot in the main section of the code.
 
 The convention is that the code to plot figure k can be found in function
-called "plot_figurek". 
+called "plot_figure[k]". 
 
 Author        : Michael Stanley
 Created       : 04 Nov 2021
