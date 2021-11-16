@@ -39,40 +39,21 @@ def k(p_T_prime, p_T, N=1, S=1, C=0.05):
     return coeff * exp_term
 
 
-def smear_integrand(p_T, p_T_prime):
+def smear_integrand(p_T, p_T_prime, f_intensity):
     """ integrand of Fredholm integral """
-    f_eval = f_true(p_T=p_T)
-    kernel_eval = k(p_T_prime=p_T_prime, p_T=p_T)
-
-    return kernel_eval * f_eval
-
-
-def smear_integrand_ansatz(p_T, p_T_prime):
-    """ integrand of Fredholm integral """
-    f_eval = f_ansatz(p_T=p_T)
+    f_eval = f_intensity(p_T=p_T)
     kernel_eval = k(p_T_prime=p_T_prime, p_T=p_T)
 
     return kernel_eval * f_eval
 
 
 def g(
-    p_T_prime, lb, ub
+    p_T_prime, lb, ub, f_intensity
 ):
     """ Compute the smeared intensity at point p_T_prime """
     return quad(
         func=smear_integrand,
-        args=(p_T_prime),
-        a=lb, b=ub
-    )[0]
-
-
-def g_ansatz(
-    p_T_prime, lb, ub
-):
-    """ Compute the smeared intensity at point p_T_prime """
-    return quad(
-        func=smear_integrand_ansatz,
-        args=(p_T_prime),
+        args=(p_T_prime, f_intensity),
         a=lb, b=ub
     )[0]
 
@@ -80,81 +61,46 @@ def g_ansatz(
 def g_over_interval(
     smear_grid,
     true_lb,
-    true_ub
+    true_ub,
+    f_intensity
 ):
     """ Numerically solves g integral over interval for p_T_prime """
     g_evals = np.zeros_like(smear_grid)
 
     for i, int_grid_i in enumerate(smear_grid):
-        g_evals[i] = g(p_T_prime=int_grid_i, lb=true_lb, ub=true_ub)
+        g_evals[i] = g(
+            p_T_prime=int_grid_i,
+            lb=true_lb, ub=true_ub,
+            f_intensity=f_intensity
+        )
 
     return g_evals
 
 
-def g_over_interval_ansatz(
-    smear_grid,
-    true_lb,
-    true_ub
-):
-    """ Numerically solves g integral over interval for p_T_prime """
-    g_evals = np.zeros_like(smear_grid)
-
-    for i, int_grid_i in enumerate(smear_grid):
-        g_evals[i] = g_ansatz(p_T_prime=int_grid_i, lb=true_lb, ub=true_ub)
-
-    return g_evals
-
-
-def compute_means(unfold_grid, smear_grid):
-    """ Compute means in both unfolded and smeared space """
-    m = unfold_grid.shape[0] - 1
+def compute_means(f_intensity, true_grid, smear_grid):
+    """ Compute means in both true and smeared space """
+    m = true_grid.shape[0] - 1
     n = smear_grid.shape[0] - 1
 
-    unfold_means = np.zeros(m)
+    true_means = np.zeros(m)
     smear_means = np.zeros(n)
 
     for i in range(m):
-        unfold_means[i] = quad(
-            func=f_true,
-            a=unfold_grid[i],
-            b=unfold_grid[i + 1]
+        true_means[i] = quad(
+            func=f_intensity,
+            a=true_grid[i],
+            b=true_grid[i + 1]
         )[0]
 
     for i in range(n):
         smear_means[i] = quad(
             func=g,
-            args=(unfold_grid[0], unfold_grid[-1]),
+            args=(true_grid[0], true_grid[-1], f_intensity),
             a=smear_grid[i],
             b=smear_grid[i + 1]
         )[0]
 
-    return unfold_means, smear_means
-
-
-def compute_means_ansatz(unfold_grid, smear_grid):
-    """ Same as the above, but uses the ansatz """
-    m = unfold_grid.shape[0] - 1
-    n = smear_grid.shape[0] - 1
-
-    unfold_means = np.zeros(m)
-    smear_means = np.zeros(n)
-
-    for i in range(m):
-        unfold_means[i] = quad(
-            func=f_ansatz,
-            a=unfold_grid[i],
-            b=unfold_grid[i + 1]
-        )[0]
-
-    for i in range(n):
-        smear_means[i] = quad(
-            func=g_ansatz,
-            args=(unfold_grid[0], unfold_grid[-1]),
-            a=smear_grid[i],
-            b=smear_grid[i + 1]
-        )[0]
-
-    return unfold_means, smear_means
+    return true_means, smear_means
 
 
 def inner_int(p_T, F_i_lower, F_i_upper):
