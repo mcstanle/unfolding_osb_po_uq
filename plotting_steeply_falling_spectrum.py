@@ -14,13 +14,16 @@ Last Modified : 17 Nov 2021
 ===============================================================================
 """
 import json
+from matplotlib import ticker
 from matplotlib.colors import LogNorm
+from matplotlib.patches import Patch
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 import seaborn as sns
 from statsmodels.stats.proportion import proportion_confint
 from steeply_falling_spectra import compute_intensities
+from utils import compute_expected_length
 
 plt.style.use('seaborn-colorblind')
 
@@ -685,4 +688,123 @@ def plot_figure19(save_loc=None):
     if save_loc:
         plt.savefig(save_loc, dpi=300)
 
+    plt.show()
+
+
+def plot_figure20(save_loc=None):
+    """
+    Plot explected bin interval widths with the different shape constraints.
+
+    Parameters:
+    -----------
+        save_loc (str) : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # read in the optimized OSB/PO/SSB intervals
+    intervals = np.load(
+        file='./data/steeply_falling_spectrum/intervals_optimized_ansatz_rank_def_uneven_bin.npy'
+    )
+
+    # define dictionary for intervals
+    interval_dict = {
+        'osb|n': intervals[0, 0, :, :, :].copy(),
+        'osb|nd': intervals[0, 1, :, :, :].copy(),
+        'osb|ndc': intervals[0, 2, :, :, :].copy(),
+        'po|n': intervals[1, 0, :, :, :].copy(),
+        'po|nd': intervals[1, 1, :, :, :].copy(),
+        'po|ndc': intervals[1, 2, :, :, :].copy(),
+        'ssb|n': intervals[2, 0, :, :, :].copy(),
+        'ssb|nd': intervals[2, 1, :, :, :].copy(),
+        'ssb|ndc': intervals[2, 2, :, :, :].copy(),
+    }
+
+    # find expected lengths
+    exp_len_osb_n = compute_expected_length(interval_dict['osb|n'])
+    exp_len_osb_nd = compute_expected_length(interval_dict['osb|nd'])
+    exp_len_osb_ndc = compute_expected_length(interval_dict['osb|ndc'])
+
+    exp_len_po_n = compute_expected_length(interval_dict['po|n'])
+    exp_len_po_nd = compute_expected_length(interval_dict['po|nd'])
+    exp_len_po_ndc = compute_expected_length(interval_dict['po|ndc'])
+
+    exp_len_ssb_n = compute_expected_length(interval_dict['ssb|n'])
+    exp_len_ssb_nd = compute_expected_length(interval_dict['ssb|nd'])
+    exp_len_ssb_ndc = compute_expected_length(interval_dict['ssb|ndc'])
+
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(12.5, 6), sharex=True, sharey=False)
+
+    bin_num = np.arange(1, 11)
+
+    # ---- OSB vs. SSB
+    # OSB
+    osb_ln1, = ax[0].plot(bin_num, exp_len_osb_n, color='blue', linestyle='--')
+    osb_ln2, = ax[0].plot(bin_num, exp_len_osb_nd, color='green', linestyle='--')
+    osb_ln3, = ax[0].plot(bin_num, exp_len_osb_ndc, color='orange', linestyle='--')
+
+    # PO
+    po_ln1, = ax[0].plot(bin_num, exp_len_po_n, color='blue', linestyle=':')
+    po_ln2, = ax[0].plot(bin_num, exp_len_po_nd, color='green', linestyle=':')
+    po_ln3, = ax[0].plot(bin_num, exp_len_po_ndc, color='orange', linestyle=':')
+
+    # SSB
+    ssb_ln1, = ax[0].plot(bin_num, exp_len_ssb_n, color='blue')
+    ssb_ln2, = ax[0].plot(bin_num, exp_len_ssb_nd, color='green')
+    ssb_ln3, = ax[0].plot(bin_num, exp_len_ssb_ndc, color='orange')
+
+    # create faux lines for labels
+    osb_linestyle, = ax[0].plot([1], [0], color='gray', linestyle='--')
+    po_linestyle, = ax[0].plot([1], [0], color='gray', linestyle=':')
+    ssb_linestyle, = ax[0].plot([1], [0], color='gray')
+    nn_line = Patch(facecolor='blue')
+    nd_line = Patch(facecolor='green')
+    ndc_line = Patch(facecolor='orange')
+
+    # labels and such
+    ax[0].legend(
+        [osb_linestyle, po_linestyle, ssb_linestyle, nn_line, nd_line, ndc_line],
+        ['OSB', 'PO', 'SSB', 'Non-Negative', 'Non-Negative/Decreasing', 'Non-negative/Decreasing/Convex']
+    )
+
+    # ---- Percent Change
+
+    # OSB
+    osb_ln1, = ax[1].plot(
+        bin_num, (exp_len_osb_n - exp_len_ssb_n) / exp_len_ssb_n, color='blue', linestyle='--'
+    )
+    osb_ln2, = ax[1].plot(
+        bin_num, (exp_len_osb_nd - exp_len_ssb_nd) / exp_len_ssb_nd, color='green', linestyle='--'
+    )
+    osb_ln3, = ax[1].plot(
+        bin_num, (exp_len_osb_ndc - exp_len_ssb_ndc) / exp_len_ssb_ndc, color='orange', linestyle='--'
+    )
+
+    # PO
+    po_ln1, = ax[1].plot(
+        bin_num, (exp_len_po_n - exp_len_ssb_n) / exp_len_ssb_n, color='blue', linestyle=':'
+    )
+    po_ln2, = ax[1].plot(
+        bin_num, (exp_len_po_nd - exp_len_ssb_nd) / exp_len_ssb_nd, color='green', linestyle=':'
+    )
+    po_ln3, = ax[1].plot(
+        bin_num, (exp_len_po_ndc - exp_len_ssb_ndc) / exp_len_ssb_ndc, color='orange', linestyle=':'
+    )
+
+    # labels
+    ax[0].set_ylabel('Expected Interval Width')
+    ax[1].set_ylabel('Interval Width Percent Change (w.r.t. SSB Intervals)')
+    fig.text(0.5, 0, 'Bin Number', ha='center', fontsize=12)
+
+    # add a zero line
+    ax[1].axhline(0, linestyle='-.', color='gray', alpha=0.1)
+
+    # set the yaxis of ax[1] to percentage
+    ax[1].yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1))
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+    
     plt.show()

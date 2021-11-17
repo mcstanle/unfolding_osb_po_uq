@@ -3,7 +3,7 @@ Utility functions for code in this directory.
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 05 Nov 2021
+Last Modified : 17 Nov 2021
 ===============================================================================
 """
 import numpy as np
@@ -300,3 +300,16 @@ def compute_mean_std_width(intervals):
         std_widths[i] = (intervals[:, i, 1] - intervals[:, i, 0]).std()
 
     return mean_widths, std_widths
+
+
+def compute_expected_length(intervals):
+    """ handles missing intervals """
+    num_bins = intervals.shape[0]
+    exp_lengths = np.zeros(num_bins)
+    interval_diff = intervals[:, :, 1] - intervals[:, :, 0]
+    
+    for i in range(num_bins):
+        x = interval_diff[i, :]
+        exp_lengths[i] = x[x != 0].mean()
+        
+    return exp_lengths
