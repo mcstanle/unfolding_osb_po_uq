@@ -12,7 +12,7 @@ Intensity Functions
 
 Author        : Michael Stanley
 Created       : 16 Nov 2021
-Last Modified : 16 Nov 2021
+Last Modified : 17 Nov 2021
 ===============================================================================
 """
 from functools import partial
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         f_ansatz=f_ans
     )
 
-    # full-rank setup
+    # Rank-deficient setup
     t_means, s_means, t_means_ans, s_means_ans = compute_true_ansatz_sfs_means(
         true_edges=true_grid,
         smear_edges=smear_grid,

@@ -141,8 +141,8 @@ def plot_figure16(save_loc=None):
     # read in the matrices
     mats_tall = np.load(file='./smearing_matrices/K_wide_mats_sfs.npz')
     mats = np.load(file='./smearing_matrices/K_rank_def_mats_sfs.npz')
-    K_tall = mats_wide['K_wide']
-    K_tall_mc = mats_wide['K_wide_mc']
+    K_tall = mats_tall['K_wide']
+    K_tall_mc = mats_tall['K_wide_mc']
     K = mats['K']
     K_mc = mats['K_mc']
 
@@ -150,7 +150,7 @@ def plot_figure16(save_loc=None):
     CMAP = 'bone'
 
     diff_30x10 = np.abs(K_tall - K_tall_mc)
-    diff_30x60 = np.abs(K - K_fr)
+    diff_30x60 = np.abs(K - K_mc)
 
     # set zeros to small number
     EPS = 10e-18
@@ -182,6 +182,70 @@ def plot_figure16(save_loc=None):
     # add some labels
     ax[0].set_title('30x10')
     ax[1].set_title('30x60')
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
+
+
+def plot_figure17(save_loc=None):
+    """
+    Plotting under-coverage of least-squares wide-bin intervals.
+
+    Parameters:
+    -----------
+        save_loc (str) : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # read in the coverage data
+    coverage_ls_wb = np.load(
+        file='./data/steeply_falling_spectrum/ints_cov_wide_ls.npz'
+    )['coverage_ls_wb']
+    coverage_ls_wb_sim = coverage_ls_wb.mean(axis=0)
+
+    num_sims = coverage_ls_wb.shape[0]
+
+    # read in the endpoints
+    close_func_endpoints = np.load('./functionals/sfs_close_func_endpoints.npy')
+
+    # coverage
+    # find the clopper-pearson intervals
+    clop_pears_ints = np.array(
+        [proportion_confint(i*num_sims, num_sims, alpha=0.05, method='beta') for i in coverage_ls_wb_sim]
+    ).T
+
+    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+
+    WIDTH_UNFOLD = np.diff(close_func_endpoints)
+
+    # plot the coverage
+    ax.bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_ls_wb_sim,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+
+    ax.errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_ls_wb_sim,
+        yerr=np.abs(coverage_ls_wb_sim - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+
+    ax.axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # move the legend
+    ax.legend(bbox_to_anchor=(0.40, 1.20))
+
+    ax.set_ylabel('Estimated Coverage')
+    ax.set_xlabel('Transverse Momentum (GeV)')
+
+    plt.tight_layout()
 
     if save_loc:
         plt.savefig(save_loc, dpi=300)

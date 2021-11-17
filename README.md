@@ -35,7 +35,10 @@ All bin aggregation functionals are generated in `create_functionals.py`. Both s
 To empirically evaluate the coverage of these interval estimator, we must sample many times from the true distribution to fit each interval method many times. Hence, we must create ensembles of true data.
 
 ### Wide-Bin Deconvolution
-The original data used for the analysis in the paper is included in `./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy`. However, the code used to generate that data is found in `data_generation_deconvolution.py`. It should be noted that if one wants to generate their own data using this file, results will differ slightly from those in the paper. 
+The original data used for the analysis in the paper is included in `./data/wide_bin_deconvolution/simulation_data_ORIGINAL.npy`. However, the code used to generate that data is found in `data_generation_deconvolution.py`. It should be noted that if one wants to generate their own data using this file, results will differ slightly from those in the paper.
+
+### Steeply Falling Particle Spectrum
+The original data used for the analysis in the paper is included in `./data/steeply_falling_spectrum/data_ORIGINAL.npy`. If one wishes to generate the data again for oneself, please use the script `data_generation_steeply_falling_spectrum.py`. As above, it should be noted that these data will differ from the original, leading to slightly different results.
 
 # Code to fit the different types of intervals
 We fit many different interval estimators throughout the paper. All of these computational methods can be found in `interval_estimators.py`. This script contains functions for fitting the folling intervals:
