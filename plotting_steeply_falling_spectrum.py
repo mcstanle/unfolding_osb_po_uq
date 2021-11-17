@@ -435,3 +435,254 @@ def plot_figure18(save_loc=None):
         plt.savefig(save_loc, dpi=300)
 
     plt.show()
+
+
+def plot_figure19(save_loc=None):
+    """
+    Plotting sample 95% confidence intervals for OSB, PO, and SSB intervals.
+
+    Parameters:
+    -----------
+        save_loc (str) : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # showing coverage of OSB and PO is preserved
+    fig, ax = plt.subplots(ncols=3, nrows=3, figsize=(12, 6), sharey=True)
+
+    # read in the endpoints
+    close_func_endpoints = np.load('./functionals/sfs_close_func_endpoints.npy')
+    WIDTH_UNFOLD = np.diff(close_func_endpoints)
+    ALPHA = 0.05
+    NUM_SIMS = 1000
+
+    # read in the computed coverages
+    coverage_obj = np.load(
+        file='./data/steeply_falling_spectrum/estimated_coverages.npz'
+    )
+    coverage_osb_n = coverage_obj['coverage_osb_n']
+    coverage_osb_nd = coverage_obj['coverage_osb_nd']
+    coverage_osb_ndc = coverage_obj['coverage_osb_ndc']
+    coverage_po_n = coverage_obj['coverage_po_n']
+    coverage_po_nd = coverage_obj['coverage_po_nd']
+    coverage_po_ndc = coverage_obj['coverage_po_ndc']
+    coverage_ssb_n = coverage_obj['coverage_ssb_n']
+    coverage_ssb_nd = coverage_obj['coverage_ssb_nd']
+    coverage_ssb_ndc = coverage_obj['coverage_ssb_ndc']
+
+    # ----- OSB Coverage -----
+
+    # non-negative
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_osb_n]
+    ).T
+
+    ax[0, 0].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_osb_n,
+        yerr=np.abs(coverage_osb_n - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M_D = 1000$)'
+    )
+
+    ax[0, 0].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_osb_n,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[0, 0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    ax[0, 0].set_ylabel('OSB')
+
+    # non-negative + decreasing
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_osb_nd]
+    ).T
+
+    ax[0, 1].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_osb_nd,
+        yerr=np.abs(coverage_osb_nd - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[0, 1].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_osb_nd,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[0, 1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # non-negative + decreasing + convex
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_osb_ndc]
+    ).T
+
+    ax[0, 2].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_osb_ndc,
+        yerr=np.abs(coverage_osb_ndc - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[0, 2].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_osb_ndc,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[0, 2].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # ----- PO Coverage -----
+
+    # non-negative
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_po_n]
+    ).T
+
+    ax[1, 0].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_po_n,
+        yerr=np.abs(coverage_po_n - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[1, 0].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_po_n,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[1, 0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    ax[1, 0].set_ylabel('PO')
+
+    # non-negative + decreasing
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_po_nd]
+    ).T
+
+    ax[1, 1].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_po_nd,
+        yerr=np.abs(coverage_po_nd - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[1, 1].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_po_nd,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[1, 1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # non-negative + decreasing + convex
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_po_ndc]
+    ).T
+
+    ax[1, 2].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_po_ndc,
+        yerr=np.abs(coverage_po_ndc - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[1, 2].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_po_ndc,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[1, 2].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # ----- SSB Coverage -----
+
+    # non-negative
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_ssb_n]
+    ).T
+
+    ax[2, 0].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_ssb_n,
+        yerr=np.abs(coverage_ssb_n - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[2, 0].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_ssb_n,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[2, 0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    ax[2, 0].set_ylabel('SSB')
+
+    # non-negative + decreasing
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_ssb_nd]
+    ).T
+
+    ax[2, 1].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_ssb_nd,
+        yerr=np.abs(coverage_ssb_nd - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[2, 1].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_ssb_nd,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[2, 1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # non-negative + decreasing + convex
+    clop_pears_ints = np.array(
+        [proportion_confint(i*NUM_SIMS, NUM_SIMS, alpha=ALPHA, method='beta') for i in coverage_ssb_ndc]
+    ).T
+
+    ax[2, 2].errorbar(
+        x=(close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2,
+        y=coverage_ssb_ndc,
+        yerr=np.abs(coverage_ssb_ndc - clop_pears_ints),
+        capsize=7, ls='none', label=r'95% Clopper-Pearson Intervals ($M = 100$)'
+    )
+
+    ax[2, 2].bar(
+        x=close_func_endpoints[:-1],
+        height=coverage_ssb_ndc,
+        width=WIDTH_UNFOLD,
+        align='edge', fill=False, edgecolor='black'
+    )
+    ax[2, 2].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
+
+    # set titles above the columns
+    ax[0, 0].set_title('Non-negative')
+    ax[0, 1].set_title('Non-negative/Decreasing')
+    ax[0, 2].set_title('Non-negative/Decreasing/Convex')
+
+    # add a legend
+    ax[0, 0].legend(bbox_to_anchor=(0.1, 1.15), fontsize='small')
+
+    # lop off the bottoms!!!
+    ax[0, 0].set_ylim(bottom=0.7)
+
+    # add a common axis labels
+    fig.text(
+        0, 0.5, 'Estimated Coverage', va='center', rotation='vertical', fontsize=12
+    )
+    fig.text(0.5, 0, 'Transverse Momentum (GeV)', ha='center', fontsize=12)
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()

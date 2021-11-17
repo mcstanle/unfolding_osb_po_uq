@@ -14,7 +14,9 @@ from plotting_steeply_falling_spectrum import (
     plot_figure15,
     plot_figure16,
     plot_figure17,
-    plot_figure18
+    plot_figure18,
+    plot_figure19,
+    # plot_figure20
 )
 
 if __name__ == "__main__":
@@ -22,4 +24,6 @@ if __name__ == "__main__":
     # plot_figure15()
     # plot_figure16()
     # plot_figure17()
-    plot_figure18()
+    # plot_figure18()
+    plot_figure19()
+    # plot_figure20()
