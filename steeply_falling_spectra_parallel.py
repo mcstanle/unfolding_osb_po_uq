@@ -15,7 +15,8 @@ TODO: change the names of the referenced functions and such.
 
 Author        : Mike Stanley
 Created       : 31 Aug 2021
-Last Modified : 21 Sep 2021
+Last Modified : 17 Nov 2021
+===============================================================================
 """
 import multiprocessing as mp
 import numpy as np
@@ -23,8 +24,11 @@ import sys
 from time import time
 from tqdm import tqdm
 
-from prior_optimized_intervals import prior_interval_opt_cvxpy_A
-from simulate_coverage import constrained_interval_cvxpy_A, stark_intervals_cvxpy_A
+from interval_estimators import (
+    osb_interval,
+    po_interval,
+    ssb_interval
+)
 
 def interval_opt_i(
     i, index_map, constraint_dict, H, data, K, prior_mean, alpha, verbose, options
@@ -85,7 +89,7 @@ def interval_opt_i(
 
     if int_type == 0:  # osb
         try:
-            opt_interval = constrained_interval_cvxpy_A(
+            opt_interval = osb_interval(
                 y=data_i,
                 K=K,
                 h=h,
@@ -98,7 +102,7 @@ def interval_opt_i(
             opt_interval = (0, 0)
     elif int_type == 1:  # po
         try:
-            opt_interval = prior_interval_opt_cvxpy_A(
+            opt_interval = po_interval(
                 y=data_i, prior_mean=prior_mean, K=K,
                 h=h, A=A_opt, alpha=alpha, verbose=verbose,
                 options=options
@@ -107,7 +111,7 @@ def interval_opt_i(
             opt_interval = (0, 0)
     elif int_type == 2:  # stark
         try:
-            opt_interval = stark_intervals_cvxpy_A(
+            opt_interval = ssb_interval(
                 y=data_i, K=K, h=h, A=A_opt, alpha=alpha, verbose=verbose, options=options
             )
         except:

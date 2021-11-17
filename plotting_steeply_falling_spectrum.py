@@ -251,3 +251,187 @@ def plot_figure17(save_loc=None):
         plt.savefig(save_loc, dpi=300)
 
     plt.show()
+
+
+def plot_figure18(save_loc=None):
+    """
+    Plotting sample 95% confidence intervals for OSB, PO, and SSB intervals.
+
+    Parameters:
+    -----------
+        save_loc (str) : saving location -- note saved, by default
+
+    Returns:
+    --------
+        None -- makes matplotlib plot
+    """
+    # read in the optimized OSB/PO/SSB intervals
+    intervals = np.load(
+        file='./data/steeply_falling_spectrum/intervals_optimized_ansatz_rank_def_uneven_bin.npy'
+    )
+
+    # read in the least-squares intervals
+    intervals_ls_wb = np.load(file='./data/steeply_falling_spectrum/ints_cov_wide_ls.npz')['intervals_ls_wb']
+
+    # create the true functional values
+    H = np.load(file='./functionals/H_steeply_falling_spectrum.npy')
+    true_means = np.load(file='./bin_means/sfs_rd.npz')['t_means']
+    true_func_vals = H @ true_means
+
+    # define dictionary for intervals
+    interval_dict = {
+        'osb|n': intervals[0, 0, :, :, :].copy(),
+        'osb|nd': intervals[0, 1, :, :, :].copy(),
+        'osb|ndc': intervals[0, 2, :, :, :].copy(),
+        'po|n': intervals[1, 0, :, :, :].copy(),
+        'po|nd': intervals[1, 1, :, :, :].copy(),
+        'po|ndc': intervals[1, 2, :, :, :].copy(),
+        'ssb|n': intervals[2, 0, :, :, :].copy(),
+        'ssb|nd': intervals[2, 1, :, :, :].copy(),
+        'ssb|ndc': intervals[2, 2, :, :, :].copy(),
+    }
+
+    # read in the endpoints
+    close_func_endpoints = np.load('./functionals/sfs_close_func_endpoints.npy')
+    EP_DIFFS = np.diff(close_func_endpoints)
+
+    WIDTH_WIDE = EP_DIFFS
+    bar_position_left = (close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2 - (WIDTH_WIDE/3)
+    bar_position_mid = (close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2
+    bar_position_right = (close_func_endpoints[1:] + close_func_endpoints[:-1]) / 2 + (WIDTH_WIDE/3)
+
+    sample_j = 100
+
+    fig = plt.figure(figsize=(14, 7))
+
+    ax1 = fig.add_subplot(2, 2, 1)
+    ax2 = fig.add_subplot(2, 2, 2, sharex=ax1)
+    ax3 = fig.add_subplot(2, 2, 3, sharex=ax1, sharey=ax2)
+    ax4 = fig.add_subplot(2, 2, 4, sharex=ax1, sharey=ax2)
+
+    # non-negative
+    osb_midpoints_n = (interval_dict['osb|n'][:, sample_j, 1] + interval_dict['osb|n'][:, sample_j, 0]) / 2
+    po_midpoints_n = (interval_dict['po|n'][:, sample_j, 1] + interval_dict['po|n'][:, sample_j, 0]) / 2
+    ssb_midpoints_n = (interval_dict['ssb|n'][:, sample_j, 1] + interval_dict['ssb|n'][:, sample_j, 0]) / 2
+
+    # non-negative/decreasing
+    osb_midpoints_nd = (interval_dict['osb|nd'][:, sample_j, 1] + interval_dict['osb|nd'][:, sample_j, 0]) / 2
+    po_midpoints_nd = (interval_dict['po|nd'][:, sample_j, 1] + interval_dict['po|nd'][:, sample_j, 0]) / 2
+    ssb_midpoints_nd = (interval_dict['ssb|nd'][:, sample_j, 1] + interval_dict['ssb|nd'][:, sample_j, 0]) / 2
+
+    # non-negative/decreasing/convex
+    osb_midpoints_ndc = (interval_dict['osb|ndc'][:, sample_j, 1] + interval_dict['osb|ndc'][:, sample_j, 0]) / 2
+    po_midpoints_ndc = (interval_dict['po|ndc'][:, sample_j, 1] + interval_dict['po|ndc'][:, sample_j, 0]) / 2
+    ssb_midpoints_ndc = (interval_dict['ssb|ndc'][:, sample_j, 1] + interval_dict['ssb|ndc'][:, sample_j, 0]) / 2
+
+    # least squares
+    ls_midpoints = (intervals_ls_wb[sample_j, :, 1] + intervals_ls_wb[sample_j, :, 0])
+
+    # non-negative
+    ax1.bar(
+        x=close_func_endpoints[:-1], height=true_func_vals, width=WIDTH_WIDE,
+        align='edge', fill=False, edgecolor='gray', label='Aggregated Bin Means'
+    )
+    ax1.errorbar(
+        x=bar_position_left, y=osb_midpoints_n,
+        yerr=np.abs(interval_dict['osb|n'][:, sample_j, :] - osb_midpoints_n[:, np.newaxis]).T,
+        capsize=4, ls='none', label='OSB', color='red'
+    )
+    ax1.errorbar(
+        x=bar_position_mid, y=po_midpoints_n,
+        yerr=np.abs(interval_dict['po|n'][:, sample_j, :] - po_midpoints_n[:, np.newaxis]).T,
+        capsize=4, ls='none', label='PO', color='blue'
+    )
+    ax1.errorbar(
+        x=bar_position_right, y=ssb_midpoints_n,
+        yerr=np.abs(interval_dict['ssb|n'][:, sample_j, :] - ssb_midpoints_n[:, np.newaxis]).T,
+        capsize=4, capthick=1.5, ls='none', label='SSB', color='orange'
+    )
+
+    # NN + Decr
+    ax2.bar(
+        x=close_func_endpoints[:-1], height=true_func_vals, width=WIDTH_WIDE,
+        align='edge', fill=False, edgecolor='gray', label='Aggregated Bin Means'
+    )
+    ax2.errorbar(
+        x=bar_position_left, y=osb_midpoints_nd,
+        yerr=np.abs(interval_dict['osb|nd'][:, sample_j, :] - osb_midpoints_nd[:, np.newaxis]).T,
+        capsize=4, ls='none', label='OSB', color='red'
+    )
+    ax2.errorbar(
+        x=bar_position_mid, y=po_midpoints_nd,
+        yerr=np.abs(interval_dict['po|nd'][:, sample_j, :] - po_midpoints_nd[:, np.newaxis]).T,
+        capsize=4, ls='none', label='PO', color='blue'
+    )
+    ax2.errorbar(
+        x=bar_position_right, y=ssb_midpoints_nd,
+        yerr=np.abs(interval_dict['ssb|nd'][:, sample_j, :] - ssb_midpoints_nd[:, np.newaxis]).T,
+        capsize=4, capthick=1.5, ls='none', label='SSB', color='orange'
+    )
+
+    # NN + decr + convx
+    ax3.bar(
+        x=close_func_endpoints[:-1], height=true_func_vals, width=WIDTH_WIDE,
+        align='edge', fill=False, edgecolor='gray', label='Aggregated Bin Means'
+    )
+    ax3.errorbar(
+        x=bar_position_left, y=osb_midpoints_ndc,
+        yerr=np.abs(interval_dict['osb|ndc'][:, sample_j, :] - osb_midpoints_ndc[:, np.newaxis]).T,
+        capsize=4, ls='none', label='OSB', color='red'
+    )
+    ax3.errorbar(
+        x=bar_position_mid, y=po_midpoints_ndc,
+        yerr=np.abs(interval_dict['po|ndc'][:, sample_j, :] - po_midpoints_ndc[:, np.newaxis]).T,
+        capsize=4, ls='none', label='PO', color='blue'
+    )
+    ax3.errorbar(
+        x=bar_position_right, y=ssb_midpoints_ndc,
+        yerr=np.abs(interval_dict['ssb|ndc'][:, sample_j, :] - ssb_midpoints_ndc[:, np.newaxis]).T,
+        capsize=4, capthick=1.5, ls='none', label='SSB', color='orange'
+    )
+
+    # least squares
+    ls_midpoints = (interval_dict['po|ndc'][:, sample_j, 1] + interval_dict['po|ndc'][:, sample_j, 0]) / 2
+
+    ax4.bar(
+        x=close_func_endpoints[:-1], height=true_func_vals, width=WIDTH_WIDE,
+        align='edge', fill=False, edgecolor='gray'
+    )
+    ax4.errorbar(
+        x=bar_position_mid, y=ls_midpoints,
+        yerr=np.abs(intervals_ls_wb[sample_j, :, :] - ls_midpoints[:, np.newaxis]).T,
+        capsize=4, capthick=2, ls='none', label='Least-Squares', color='black'
+    )
+
+    # add a common axis labels
+    fig.text(0, 0.5, 'Bin Counts', va='center', rotation='vertical', fontsize=12)
+    fig.text(0.5, 0, 'Transverse Momentum (GeV)', ha='center', fontsize=12)
+
+    # add subtitles
+    ax1.set_title('Non-Negative')
+    ax2.set_title('Non-Negative/Decreasing')
+    ax3.set_title('Non-Negative/Decreasing/Convex')
+    ax4.set_title('Least-Squares - No Constraints')
+
+    # set bounds for ax2
+    ax2.set_ylim(350, 1e6)
+
+    # switch y-axis to log scale
+    ax1.set_yscale('log')
+    ax2.set_yscale('log')
+    ax3.set_yscale('log')
+    ax4.set_yscale('log')
+
+    # legends
+    ax2.legend()
+    ax4.legend()
+
+    # shut off the bottom right axis
+    # ax[1, 1].set_axis_off()
+
+    plt.tight_layout()
+
+    if save_loc:
+        plt.savefig(save_loc, dpi=300)
+
+    plt.show()
