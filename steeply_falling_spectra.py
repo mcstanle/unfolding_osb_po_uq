@@ -8,6 +8,7 @@ Modified : 16 Nov 2021
 ===============================================================================
 '''
 from functools import partial
+import json
 import numpy as np
 from scipy import stats
 from scipy.integrate import quad
@@ -153,3 +154,36 @@ def gen_poisson_data(mu):
         data[i] = stats.poisson(mu=mu[i]).rvs()
 
     return data
+
+
+def compute_intensities():
+    """
+    Returns the predefined intensity functions from 
+    './simulation_model_parameters.json'.
+    """
+    with open('./simulation_model_parameters.json') as f:
+        parameters = json.load(f)
+
+    true_params = parameters['steep_f_spec_truth']
+    mc_params = parameters['steep_f_spec_ansatz']
+
+    f_true = partial(
+        f_sf, 
+        L=true_params['L'],
+        N_0=true_params['N_0'],
+        alpha=true_params['ALPHA'],
+        sqrt_s=true_params['SQRT_S'],
+        beta=true_params['BETA'],
+        gamma=true_params['GAMMA']
+    )
+    f_ans = partial(
+        f_sf, 
+        L=mc_params['L'],
+        N_0=mc_params['N_0'],
+        alpha=mc_params['ALPHA'],
+        sqrt_s=mc_params['SQRT_S'],
+        beta=mc_params['BETA'],
+        gamma=mc_params['GAMMA']
+    )
+
+    return f_true, f_ans

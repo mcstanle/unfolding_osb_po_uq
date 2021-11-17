@@ -7,14 +7,14 @@ Usage:
     minutes, which is why the switches exist.
 
 This script computes smearing matrices for the following setups (smear x true)
-1. Wide               (30 x 10)
-2. Full Rank          (30 x 30)
+1. Wide           (30 x 10)
+2. Rank Deficient (30 x 30)
 
 NOTE: matrices are saved with the suffix, 'sfs' for "steeply falling spectrum"
 
 Author        : Michael Stanley
 Created       : 02 Nov 2021
-Last Modified : 16 Nov 2021
+Last Modified : 17 Nov 2021
 ===============================================================================
 """
 from functools import partial
@@ -113,17 +113,17 @@ if __name__ == "__main__":
     
     if COMPUTE_FR:
         START = time()
-        K_fr, K_fr_mc = compute_true_and_mc_K(
+        K, K_mc = compute_true_and_mc_K(
             true_params=true_params,
             mc_params=mc_params,
             true_edges=true_grid,
             smear_edges=smear_grid
         )
         np.savez(
-            file=MATRIX_BASE_LOC + '/K_full_rank_mats_sfs.npz',
-            K_fr=K_fr,
-            K_fr_mc=K_fr_mc
+            file=MATRIX_BASE_LOC + '/K_rank_def_mats_sfs.npz',
+            K=K,
+            K_mc=K_mc
         )
-        print('- Full Rank [Done] -> %.2f seconds' % (time() - START))
+        print('- Rank Deficient [Done] -> %.2f seconds' % (time() - START))
     else:
-        print('- Full Rank [Skip]')
+        print('- Rank Deficient [Skip]')

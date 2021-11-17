@@ -19,7 +19,7 @@ from functools import partial
 import json
 import numpy as np
 from steeply_falling_spectra import (
-    compute_means, f_sf
+    compute_intensities, compute_means, f_sf
 )
 from time import time
 
@@ -79,24 +79,7 @@ if __name__ == "__main__":
     true_params = parameters['steep_f_spec_truth']
     mc_params = parameters['steep_f_spec_ansatz']
 
-    f_true = partial(
-        f_sf, 
-        L=true_params['L'],
-        N_0=true_params['N_0'],
-        alpha=true_params['ALPHA'],
-        sqrt_s=true_params['SQRT_S'],
-        beta=true_params['BETA'],
-        gamma=true_params['GAMMA']
-    )
-    f_ans = partial(
-        f_sf, 
-        L=mc_params['L'],
-        N_0=mc_params['N_0'],
-        alpha=mc_params['ALPHA'],
-        sqrt_s=mc_params['SQRT_S'],
-        beta=mc_params['BETA'],
-        gamma=mc_params['GAMMA']
-    )
+    f_true, f_ans = compute_intensities()
 
     # wide setup
     t_means_w, s_means_w, t_means_ans_w, s_means_ans_w = compute_true_ansatz_sfs_means(
@@ -107,7 +90,7 @@ if __name__ == "__main__":
     )
 
     # full-rank setup
-    t_means_fr, s_means_fr, t_means_ans_fr, s_means_ans_fr = compute_true_ansatz_sfs_means(
+    t_means, s_means, t_means_ans, s_means_ans = compute_true_ansatz_sfs_means(
         true_edges=true_grid,
         smear_edges=smear_grid,
         f_true=f_true,
@@ -123,9 +106,9 @@ if __name__ == "__main__":
         s_means_ans_w=s_means_ans_w
     )
     np.savez(
-        file=BIN_MEAN_BASE_LOC + '/sfs_fr.npz',
-        t_means_fr=t_means_fr,
-        s_means_fr=s_means_fr,
-        t_means_ans_fr=t_means_ans_fr,
-        s_means_ans_fr=s_means_ans_fr
+        file=BIN_MEAN_BASE_LOC + '/sfs_rd.npz',
+        t_means=t_means,
+        s_means=s_means,
+        t_means_ans=t_means_ans,
+        s_means_ans=s_means_ans
     )

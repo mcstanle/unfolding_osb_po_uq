@@ -7,7 +7,7 @@ linear functionals in the paper. Each row of "H" is one "h".
 
 Author        : Michael Stanley
 Created       : 01 Nov 2021
-Last Modified : 06 Nov 2021
+Last Modified : 17 Nov 2021
 ===============================================================================
 """
 import numpy as np
@@ -64,3 +64,4 @@ if __name__ == "__main__":
             H[functional_current, i] = 1
 
     np.save(file='./functionals/H_steeply_falling_spectrum.npy', arr=H)
+    np.save(file='./functionals/sfs_close_func_endpoints.npy', arr=close_func_endpoints)
