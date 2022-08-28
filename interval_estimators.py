@@ -62,7 +62,7 @@ def least_squares_interval(K, h, y, alpha=0.05):
     NOTE:
     - uses the normal approximation to the poisson distribution
     - this function expects that the noise covariance is the identity matrix
-
+∑
     Parameters:
     -----------
         K          (np arr) : mxn  smearing matrix - n # true bins,

@@ -94,10 +94,15 @@ def plot_figure1(save_loc=None):
     )
 
     # axis labels
-    plt.ylabel('Intensity')
-    plt.xlabel('Physical Observable')
+    plt.ylabel('Intensity', fontsize='x-large')
+    plt.xlabel('Physical Observable', fontsize='x-large')
 
-    plt.legend()
+    # tick sizes
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
+    plt.legend(fontsize='x-large')
     plt.tight_layout()
 
     if save_loc:
@@ -171,7 +176,7 @@ def plot_figure2(
         align='edge', fill=False, edgecolor='red', label='True GMM', linestyle='--'
     )
     ax[0].scatter(
-        (smear_edges[:-1] + smear_edges[1:]) / 2, ansatz_data[min_min_idx, :], label = 'Observations responsible for the \nAdversarial Ansatz'
+        (smear_edges[:-1] + smear_edges[1:]) / 2, ansatz_data[min_min_idx, :], label = 'Adversarial Ansatz\nObservations'
     )
 
     # true
@@ -195,9 +200,17 @@ def plot_figure2(
     )
 
     # axis labels
-    ax[0].set_ylabel('Expected Bin Counts')
+    ax[0].set_ylabel('Expected Bin Counts', fontsize='x-large')
 
-    ax[0].legend()
+    # increase the axis tick sizes
+    ax[0].tick_params(axis='x', labelsize='x-large')
+    ax[1].tick_params(axis='x', labelsize='x-large')
+    ax[0].tick_params(axis='y', labelsize='x-large')
+    ax[1].tick_params(axis='y', labelsize='x-large')
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    ax[1].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
+    ax[0].legend(fontsize='x-large')
     plt.tight_layout()
 
     if save_loc:
@@ -258,8 +271,8 @@ def plot_figure3(
         capsize=7, ls='none', label='Least-squares 95% Confidence Intervals', color='red'
     )
 
-    ax[0].set_ylabel('Bin Count')
-    ax[0].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[0].set_ylabel('Bin Count', fontsize='x-large')
+    ax[0].legend(bbox_to_anchor=(1, 1.22), fontsize='x-large')
     ax[0].set_ylim(bottom=-100)
 
     # coverage
@@ -286,8 +299,15 @@ def plot_figure3(
     # plot the desired level
     ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
 
-    ax[1].set_ylabel('Estimated Coverage')
-    ax[1].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[1].set_ylabel('Estimated Coverage', fontsize='x-large')
+    ax[1].legend(bbox_to_anchor=(1, 1.22), fontsize='x-large')
+
+    # axis label size adjustments
+    ax[0].tick_params(axis='x', labelsize='x-large')
+    ax[1].tick_params(axis='x', labelsize='x-large')
+    ax[0].tick_params(axis='y', labelsize='x-large')
+    ax[1].tick_params(axis='y', labelsize='x-large')
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     plt.tight_layout()
 
@@ -348,8 +368,8 @@ def plot_figure4(
         capsize=4, ls='none', label='Least-squares 95% Confidence Intervals', color='red'
     )
 
-    ax[0].set_ylabel('Bin Count')
-    ax[0].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[0].set_ylabel('Bin Count', fontsize='x-large')
+    ax[0].legend(bbox_to_anchor=(0.85, 1.2), fontsize='large')
 
     # coverage
     # find the clopper-pearson intervals
@@ -375,8 +395,15 @@ def plot_figure4(
     # plot the desired level
     ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
 
-    ax[1].set_ylabel('Estimated Coverage')
-    ax[1].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[1].set_ylabel('Estimated Coverage', fontsize='x-large')
+    ax[1].legend(bbox_to_anchor=(0.95, 1.2), fontsize='large')
+
+    # adjust tick label sizes
+    ax[0].tick_params(axis='x', labelsize='x-large')
+    ax[1].tick_params(axis='x', labelsize='x-large')
+    ax[0].tick_params(axis='y', labelsize='x-large')
+    ax[1].tick_params(axis='y', labelsize='x-large')
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     plt.tight_layout()
 
@@ -438,8 +465,8 @@ def plot_figure5(
         capsize=7, ls='none', label='Least-squares 95% Confidence Intervals', color='red'
     )
 
-    ax[0].set_ylabel('Bin Count')
-    ax[0].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[0].set_ylabel('Bin Count', fontsize='x-large')
+    ax[0].legend(bbox_to_anchor=(0.85, 1.18), fontsize='large')
 
     # coverage
     # find the clopper-pearson intervals
@@ -465,8 +492,15 @@ def plot_figure5(
     # plot the desired level
     ax[1].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
 
-    ax[1].set_ylabel('Estimated Coverage')
-    ax[1].legend(bbox_to_anchor=(0.75, 1.15))
+    ax[1].set_ylabel('Estimated Coverage', fontsize='x-large')
+    ax[1].legend(bbox_to_anchor=(0.85, 1.18), fontsize='large')
+
+    # adjust tick label sizes
+    ax[0].tick_params(axis='x', labelsize='x-large')
+    ax[1].tick_params(axis='x', labelsize='x-large')
+    ax[0].tick_params(axis='y', labelsize='x-large')
+    ax[1].tick_params(axis='y', labelsize='x-large')
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     plt.tight_layout()
 
@@ -501,7 +535,7 @@ def plot_figure6(
         file='./data/wide_bin_deconvolution/ints_cov_agg_ls.npz'
     )['intervals']
     intervals_full_rank_gmm_ans_files = np.load(
-        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz.npz'
+        file='./data/wide_bin_deconvolution/intervals_osb_po_full_rank_misspec_gmm_ansatz_ORIGINAL.npz'
     )
     intervals_osb_fr = intervals_full_rank_gmm_ans_files['intervals_osb_fr']
     intervals_po_fr = intervals_full_rank_gmm_ans_files['intervals_po_fr']
@@ -596,6 +630,10 @@ def plot_figure6(
     ax[1].set_xticks(x_plot)
     ax[1].legend()
 
+    # put the scales in scientific notation
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    ax[1].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
     plt.tight_layout()
 
     if save_loc:
@@ -654,7 +692,7 @@ def plot_figure7(
 
     # plot the desired level
     ax[0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
-    ax[0].set_ylabel('Estimated Coverage')
+    ax[0].set_ylabel('Estimated Coverage', fontsize='large')
 
     # PO Coverage
     # find the clopper-pearson intervals
@@ -685,7 +723,7 @@ def plot_figure7(
     ax[1].set_ylim(bottom=0.6)
 
     # add legend
-    ax[0].legend(bbox_to_anchor=(0.25, 1.12))
+    ax[0].legend(bbox_to_anchor=(0.2, 1.12), fontsize='large')
 
     # add titles
     ax[0].set_title('OSB')
@@ -748,7 +786,7 @@ def plot_figure8(
         align='edge', fill=False, edgecolor='black'
     )
     ax[0].axhline(0.95, linestyle='--', color='red', alpha=0.6, label='Nominal Coverage Level')
-    ax[0].set_ylabel('Estimated Coverage')
+    ax[0].set_ylabel('Estimated Coverage', fontsize='large')
 
     # OSB Coverage
     clop_pears_ints = np.array(
@@ -793,7 +831,7 @@ def plot_figure8(
     ax[2].set_ylim(bottom=0.6)
 
     # legend
-    ax[0].legend(bbox_to_anchor=(1.1, 1.35))
+    ax[0].legend(bbox_to_anchor=(1.2, 1.35))
 
     # titles
     ax[0].set_title('LS')
@@ -967,6 +1005,9 @@ def plot_figure10(save_loc=None):
 
     plt.xticks(x_plot)
 
+    # change yscale to scientific notation
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
     plt.legend()
     plt.tight_layout()
 
@@ -1073,6 +1114,9 @@ def plot_figure11(save_loc=None):
     plt.xlabel('Bin Number')
 
     plt.xticks(x_plot)
+
+    # change yscale to scientific notation
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     plt.legend()
     plt.tight_layout()
@@ -1213,7 +1257,7 @@ def plot_figure13(save_loc=None):
     for i in range(10):
         ax[1].plot(x_vals, po_mean_widths[:, i], label='Bin %i' % (i + 1), linestyle=linestyles[i % 4])
 
-    ax[0].legend(bbox_to_anchor=(1, .5))
+    ax[0].legend(bbox_to_anchor=(1, .7), fontsize='large')
 
     # set bin count axis
     ax[0].set_xticks(x_vals)
@@ -1221,10 +1265,17 @@ def plot_figure13(save_loc=None):
     ax[1].set_xticks(x_vals)
     ax[1].set_xticklabels(x_vals)
 
-    ax[0].set_xlabel('Unfold Dimension')
-    ax[1].set_xlabel('Unfold Dimension')
+    # ax[0].set_xlabel('Unfold Dimension', fontsize='x-large')
+    # ax[1].set_xlabel('Unfold Dimension', fontsize='x-large')
+    fig.text(0.5, 0.0, r'Unfold Dimension', fontsize='x-large', ha='center')
 
-    ax[0].set_ylabel('Expected Width')
+    ax[0].set_ylabel('Expected Width', fontsize='x-large')
+
+    # adjust tick sizes
+    ax[0].tick_params(axis='x', labelsize='x-large')
+    ax[1].tick_params(axis='x', labelsize='x-large')
+    ax[0].tick_params(axis='y', labelsize='x-large')
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     plt.tight_layout()
 
@@ -1332,12 +1383,14 @@ def plot_figure14(save_loc=None):
     )
 
     # axis labels
-    plt.ylabel(r'Average Interval Length (Error bars are $\pm 2$se)')
-    plt.xlabel('Bin Number')
+    plt.ylabel(r'Average Interval Length (Error bars $\pm 2$se)', fontsize='x-large')
+    plt.xlabel('Bin Number', fontsize='x-large')
 
-    plt.xticks(x_plot)
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-    plt.legend()
+    plt.legend(fontsize='x-large')
     plt.tight_layout()
 
     if save_loc:

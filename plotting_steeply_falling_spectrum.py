@@ -407,17 +407,27 @@ def plot_figure18(save_loc=None):
     )
 
     # add a common axis labels
-    fig.text(0, 0.5, 'Bin Counts', va='center', rotation='vertical', fontsize=12)
-    fig.text(0.5, 0, 'Transverse Momentum (GeV)', ha='center', fontsize=12)
+    fig.text(0.005, 0.5, 'Bin Counts', va='center', rotation='vertical', fontsize='x-large')
+    fig.text(0.5, 0.005, 'Transverse Momentum (GeV)', ha='center', fontsize='x-large')
 
     # add subtitles
-    ax1.set_title('Non-Negative')
-    ax2.set_title('Non-Negative/Decreasing')
-    ax3.set_title('Non-Negative/Decreasing/Convex')
-    ax4.set_title('Least-Squares - No Constraints')
+    ax1.set_title('Non-Negative', fontsize='x-large')
+    ax2.set_title('Non-Negative/Decreasing', fontsize='x-large')
+    ax3.set_title('Non-Negative/Decreasing/Convex', fontsize='x-large')
+    ax4.set_title('Least-Squares - No Constraints', fontsize='x-large')
 
     # set bounds for ax2
     ax2.set_ylim(350, 1e6)
+
+    # increase the size of the axis number labels
+    ax1.tick_params(axis='x', labelsize=12)
+    ax1.tick_params(axis='y', labelsize=12)
+    ax2.tick_params(axis='x', labelsize=12)
+    ax2.tick_params(axis='y', labelsize=12)
+    ax3.tick_params(axis='x', labelsize=12)
+    ax3.tick_params(axis='y', labelsize=12)
+    ax4.tick_params(axis='x', labelsize=12)
+    ax4.tick_params(axis='y', labelsize=12)
 
     # switch y-axis to log scale
     ax1.set_yscale('log')
@@ -426,13 +436,13 @@ def plot_figure18(save_loc=None):
     ax4.set_yscale('log')
 
     # legends
-    ax2.legend()
-    ax4.legend()
+    ax2.legend(fontsize=13)
+    ax4.legend(fontsize=13)
 
     # shut off the bottom right axis
     # ax[1, 1].set_axis_off()
 
-    plt.tight_layout()
+    plt.tight_layout(pad=1.5)
 
     if save_loc:
         plt.savefig(save_loc, dpi=300)
@@ -765,7 +775,8 @@ def plot_figure20(save_loc=None):
     # labels and such
     ax[0].legend(
         [osb_linestyle, po_linestyle, ssb_linestyle, nn_line, nd_line, ndc_line],
-        ['OSB', 'PO', 'SSB', 'Non-Negative', 'Non-Negative/Decreasing', 'Non-negative/Decreasing/Convex']
+        ['OSB', 'PO', 'SSB', 'Non-Negative', 'Non-Negative/Decreasing', 'Non-negative/Decreasing/Convex'],
+        fontsize=14
     )
 
     # ---- Percent Change
@@ -793,16 +804,25 @@ def plot_figure20(save_loc=None):
     )
 
     # labels
-    ax[0].set_ylabel('Expected Interval Width')
-    ax[1].set_ylabel('Interval Width Percent Change (w.r.t. SSB Intervals)')
-    fig.text(0.5, 0, 'Bin Number', ha='center', fontsize=12)
+    ax[0].set_ylabel('Expected Interval Width', fontsize=12)
+    ax[1].set_ylabel('Interval Width Percent Change (w.r.t. SSB Intervals)', fontsize=12)
+    fig.text(0.5, 0.005, 'Bin Number', ha='center', fontsize=12)
+
+    # set y-axis of left plot to scientific notation
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
     # add a zero line
     ax[1].axhline(0, linestyle='-.', color='gray', alpha=0.1)
 
     # set the yaxis of ax[1] to percentage
     ax[1].yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1))
-    plt.tight_layout()
+    plt.tight_layout(pad=1.5)
+
+    # change tick label sizes
+    ax[0].tick_params(axis='x', labelsize=12)
+    ax[0].tick_params(axis='y', labelsize=12)
+    ax[1].tick_params(axis='x', labelsize=12)
+    ax[1].tick_params(axis='y', labelsize=12)
 
     if save_loc:
         plt.savefig(save_loc, dpi=300)
