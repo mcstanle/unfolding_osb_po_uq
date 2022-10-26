@@ -1,5 +1,5 @@
 # Introduction
-This respository is designed to allow for the reproducibility of "Uncertainty quantification for wide-bin unfolding: one-at-a-time strict bounds and prior-optimized confidence intervals" (https://arxiv.org/abs/2111.01091).
+This respository is designed to allow for the reproducibility of "Uncertainty quantification for wide-bin unfolding: one-at-a-time strict bounds and prior-optimized confidence intervals" (https://doi.org/10.1088/1748-0221/17/10/P10013).
 
 This codebase is setup to be run from scratch (i.e., you get to generate everything yourself), or from pre-computed objects (i.e., smearing matrices, data, etc.). It should be noted that almost all the code in this repository can be run on a reasonable local machine. The two parts requiring more computational firepower are the brute-force computation of the adversarial ansatz (`brute_force_data_gen_ansatz.py`) and the parallelized computation of the nine different interval types for the steeply falling spectrum example (`steeply_fallling_spectra_parallel.py`).
 
